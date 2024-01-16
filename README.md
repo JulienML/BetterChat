@@ -1,6 +1,6 @@
-# BetterChat
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+# BetterChat
 
 **BetterChat** is a plugin that works with **BakkesMod**, allowing you to choose which quickchats you want to disallow at which points in the game (after a goal, after a save, etc.). There is also an anti-spam function. At the end of the game, you get a recap of the number of blocked messages for each player.
 
