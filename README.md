@@ -45,8 +45,8 @@ If you check it, you can then set the delay between two identical quickchat from
   </thead>
   <tbody>
     <tr>
-      <th><video src="https://github-production-user-asset-6210df.s3.amazonaws.com/108280870/297195757-6d7c6a9a-0282-4198-bb70-a4b889d97c0f.mp4" autoplay disablePictureInPicture muted loop></th>
-      <th><video src="https://github-production-user-asset-6210df.s3.amazonaws.com/108280870/297187707-70de540e-8c5c-4a1f-ac6d-c88261709074.mp4" autoplay disablePictureInPicture muted loop></th>
+      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/c83b0108-026b-41f9-bfd0-43a66f61233e"></th>
+      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/39237252-5f16-4041-8d87-781763e786df"></th>
     </tr>
   </tbody>
 </table>
@@ -70,8 +70,8 @@ Once you check a quickchat, it appears in the other columns, which correspond to
   </thead>
   <tbody>
     <tr>
-      <th><video src="https://github-production-user-asset-6210df.s3.amazonaws.com/108280870/297195786-a6425868-b24d-4191-ad03-f458914fb8b1.mp4" autoplay disablePictureInPicture muted loop></th>
-      <th><video src="https://github-production-user-asset-6210df.s3.amazonaws.com/108280870/297195714-ec3c57cc-735d-420a-a2a0-addd4521a9ea.mp4" autoplay disablePictureInPicture muted loop></th>
+      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/63d38f1d-a04f-4a4f-8dd4-4881f554041d"></th>
+      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/4c7b4ccc-80fd-4389-8bc7-8d74913e247d"></th>
     </tr>
   </tbody>
 </table>
