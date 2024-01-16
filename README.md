@@ -80,7 +80,7 @@ At the bottom, you can configure the position of the endgame recap of the number
 
 ![Menu4](https://github.com/JulienML/BetterChat/assets/108280870/222a4b40-2e84-410a-95ea-2babe5af5f90)
 
--- Résultat --
+![Menu5](https://github.com/JulienML/BetterChat/assets/108280870/4fdb965d-8cb5-4e34-a509-7903a4f9eba5)
 
 # Credits
 
