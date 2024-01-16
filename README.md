@@ -1,4 +1,4 @@
-# BetterChat
+# BetterChat [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **BetterChat** is a plugin that works with **BakkesMod**, allowing you to choose which quickchats you want to disallow at which points in the game (after a goal, after a save, etc.). There is also an anti-spam function. At the end of the game, you get a recap of the number of blocked messages for each player.
 
@@ -10,7 +10,7 @@ In this way, you can make the usual toxic Rocket League chat more respectful and
 * [Configuration](#configuration)
     * [Anti-Spam](#anti-spam)
     * [Chat Filter](#chat-filter)
-* [Acknowledgements](#acknowledgements)
+* [Credits](#credits)
 
 # Installation
 
@@ -82,7 +82,7 @@ At the bottom, you can configure the position of the endgame recap of the number
 
 -- Résultat --
 
-# Acknowledgements
+# Credits
 
 I was able to create this plugin thanks to these ones, from which I took inspiration several times:
 - [Quickchat Detoxify](https://bakkesplugins.com/plugins/view/361) from **oofsamy**
