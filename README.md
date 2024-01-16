@@ -39,14 +39,14 @@ If you check it, you can then set the delay between two identical quickchat from
 <table>
   <thead>
     <tr>
-      <th style='text-align: center'>Without Anti-Spam</th>
-      <th style='text-align: center'>With Anti-Spam</th>
+      <th style='text-align: center; width: 50%'>Without Anti-Spam</th>
+      <th style='text-align: center; width: 50%'>With Anti-Spam</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/c83b0108-026b-41f9-bfd0-43a66f61233e"></th>
-      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/39237252-5f16-4041-8d87-781763e786df"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/c83b0108-026b-41f9-bfd0-43a66f61233e" style="pointer-events: none;"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/39237252-5f16-4041-8d87-781763e786df" style="pointer-events: none;"></th>
     </tr>
   </tbody>
 </table>
@@ -64,14 +64,14 @@ Once you check a quickchat, it appears in the other columns, which correspond to
 <table>
   <thead>
     <tr>
-      <th style='text-align: center'>Without the Chat Filter</th>
-      <th style='text-align: center'>With the Chat Filter</th>
+      <th style='text-align: center; width: 50%'>Without the Chat Filter</th>
+      <th style='text-align: center; width: 50%'>With the Chat Filter</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/63d38f1d-a04f-4a4f-8dd4-4881f554041d"></th>
-      <th><img src="https://github.com/JulienML/BetterChat/assets/108280870/4c7b4ccc-80fd-4389-8bc7-8d74913e247d"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/63d38f1d-a04f-4a4f-8dd4-4881f554041d" style="pointer-events: none;"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/4c7b4ccc-80fd-4389-8bc7-8d74913e247d" style="pointer-events: none;"></th>
     </tr>
   </tbody>
 </table>
