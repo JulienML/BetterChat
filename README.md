@@ -45,8 +45,8 @@ If you check it, you can then set the delay between two identical quickchat from
   </thead>
   <tbody>
     <tr>
-      <th><img src="" alt="Without Anti-Spam" title="Without Anti-Spam"></th>
-      <th><img src="" alt="With Anti-Spam" title="With Anti-Spam"></th>
+      <th><video src="https://github-production-user-asset-6210df.s3.amazonaws.com/108280870/297187707-70de540e-8c5c-4a1f-ac6d-c88261709074.mp4" alt="Without Anti-Spam" title="Without Anti-Spam"></th>
+      <th><video src="https://github-production-user-asset-6210df.s3.amazonaws.com/108280870/297187707-70de540e-8c5c-4a1f-ac6d-c88261709074.mp4" alt="With Anti-Spam" title="With Anti-Spam"></th>
     </tr>
   </tbody>
 </table>
