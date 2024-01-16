@@ -24,7 +24,7 @@ You are ready to use the plugin :)
 
 You can configure the plugin easily by pressing F2 -> Plugins -> BetterChat Plugin. There, you can activate/deactive the plugin by checking or not the first box:
 
--- Photo --
+![Menu1](https://github.com/JulienML/BetterChat/assets/108280870/aac84676-04d7-4ace-8a87-f9dad6392e35)
 
 Once the box is checked, you can access to the two features, the anti-spam and the chat filter.
 
@@ -32,7 +32,7 @@ Once the box is checked, you can access to the two features, the anti-spam and t
 
 You can activate/deactivate anti-spam by checking or not the "anti-spam" box.
 
--- Photo --
+![Menu2](https://github.com/JulienML/BetterChat/assets/108280870/7898ed58-f11e-4913-b4df-a317893c6806)
 
 If you check it, you can then set the delay between two identical quickchat from the same player (default value is 5 seconds).
 
@@ -55,7 +55,7 @@ If you check it, you can then set the delay between two identical quickchat from
 
 You can activate/deactivate the chat filter by checking or not the "Chat Filter" box.
 
--- Photo --
+![Menu3](https://github.com/JulienML/BetterChat/assets/108280870/1eec183c-24f8-455f-98f8-94e5905b8d63)
 
 If you check it, you can then disallow the quickchat you want by checking them in the first column on the table.
 
@@ -78,7 +78,7 @@ Once you check a quickchat, it appears in the other columns, which correspond to
 
 At the bottom, you can configure the position of the endgame recap of the number of blocked messages.
 
--- Photo --
+![Menu4](https://github.com/JulienML/BetterChat/assets/108280870/222a4b40-2e84-410a-95ea-2babe5af5f90)
 
 -- Résultat --
 
