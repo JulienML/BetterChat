@@ -45,8 +45,8 @@ If you check it, you can then set the delay between two identical quickchat from
   </thead>
   <tbody>
     <tr>
-      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/c83b0108-026b-41f9-bfd0-43a66f61233e"></th>
-      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/39237252-5f16-4041-8d87-781763e786df"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/b60ccd7b-1461-4352-8a42-d5d43518d679"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/fafc56e7-0464-4811-8598-7d1d8c21db53"></th>
     </tr>
   </tbody>
 </table>
@@ -70,8 +70,8 @@ Once you check a quickchat, it appears in the other columns, which correspond to
   </thead>
   <tbody>
     <tr>
-      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/63d38f1d-a04f-4a4f-8dd4-4881f554041d"></th>
-      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/4c7b4ccc-80fd-4389-8bc7-8d74913e247d"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/b0152ce6-dd2c-41ab-b528-f302037bab8c"></th>
+      <th style='width: 50%'><img src="https://github.com/JulienML/BetterChat/assets/108280870/dc14da4c-5fab-49f0-ae75-6e4aec44fe33"></th>
     </tr>
   </tbody>
 </table>
