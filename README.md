@@ -16,7 +16,7 @@ In this way, you can make the usual toxic Rocket League chat more respectful and
 
 - Install [BakkesMod](https://www.bakkesmod.com/download.php).
 - Launch Rocket League and make sure BakkesMod is working.
-- Install [BetterChat]() plugin.
+- Install [BetterChat](https://bakkesplugins.com/plugins/view/416) plugin.
 
 You are ready to use the plugin :)
 
