@@ -4,7 +4,7 @@
 
 In this way, you can make the usual toxic Rocket League chat more respectful and focus on your gameplay without tilting 👍
 
-**If you have any suggestions to improve the plugin, don't hesitate to create an [Issue](https://github.com/JulienML/BetterChat/issues) or a [Pull Request](https://github.com/JulienML/BetterChat/pulls)**
+**If you have any suggestions to improve the plugin, don't hesitate to create an [Issue](https://github.com/JulienML/BetterChat/issues) or a [Pull Request](https://github.com/JulienML/BetterChat/pulls)!**
 
 # Table of contents
 
