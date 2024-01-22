@@ -38,7 +38,7 @@ You can activate/deactivate anti-spam by checking or not the "anti-spam" box.
 
 If you check it, you can then set the delay between two identical quickchat from the same player (default value is 5 seconds).
 
-| Without the Chat Filter | With the Chat Filter |
+| Without Anti-Spam | With Anti-Spam |
 | :-------------: |:-------------:|
 | ![Gif1](https://user-images.githubusercontent.com/108280870/297385991-b60ccd7b-1461-4352-8a42-d5d43518d679.gif) | ![Gif2](https://user-images.githubusercontent.com/108280870/297386150-fafc56e7-0464-4811-8598-7d1d8c21db53.gif) |
 
