@@ -24,7 +24,7 @@ void BetterChat::RenderSettings() {
 	if (!enabledCvar) { return; }
 	bool enabled = enabledCvar.getBoolValue();
 
-	//Bouton On/Off Plugin
+	// On/Off Plugin Button
 	if (ImGui::Checkbox("Enable plugin", &enabled)) {
 		enabledCvar.setValue(enabled);
 	}
@@ -44,6 +44,26 @@ void BetterChat::RenderSettings() {
 	if (!delayCvar) { return; }
 	int delay = delayCvar.getIntValue();
 
+	CVarWrapper writtenMsgCvar = cvarManager->getCvar("betterchat_writtenmsg");
+	if (!writtenMsgCvar) { return; }
+	bool writtenMsg = writtenMsgCvar.getBoolValue();
+
+	CVarWrapper afterSaveTimeCvar = cvarManager->getCvar("betterchat_aftersavetime");
+	if (!afterSaveTimeCvar) { return; }
+	int afterSaveTime = afterSaveTimeCvar.getIntValue();
+
+	CVarWrapper owngoalCvar = cvarManager->getCvar("betterchat_owngoal");
+	if (!owngoalCvar) { return; }
+	bool owngoalDetection = owngoalCvar.getBoolValue();
+
+	CVarWrapper unwantedPassCvar = cvarManager->getCvar("betterchat_unwanted_pass");
+	if (!unwantedPassCvar) { return; }
+	bool unwantedPassDetection = unwantedPassCvar.getBoolValue();
+
+	CVarWrapper toxicityScoresCvar = cvarManager->getCvar("betterchat_toxicityscores");
+	if (!toxicityScoresCvar) { return; }
+	bool toxicityScores = toxicityScoresCvar.getBoolValue();
+
 	CVarWrapper toxicityScoreXCvar = cvarManager->getCvar("betterchat_score_X");
 	if (!toxicityScoreXCvar) { return; }
 	int toxicityScoreX = toxicityScoreXCvar.getIntValue();
@@ -55,7 +75,7 @@ void BetterChat::RenderSettings() {
 	if (enabled) {
 		ImGui::Text("\n");
 
-		// Bouton AntiSpam
+		// AntiSpam button
 		if (ImGui::Checkbox("AntiSpam", &antiSpam)) {
 			antiSpamCvar.setValue(antiSpam);
 		}
@@ -63,7 +83,7 @@ void BetterChat::RenderSettings() {
 			ImGui::SetTooltip("Enable/Disable AntiSpam");
 		}
 
-		// Curseur Délai AntiSpam
+		// AntiSpam delay slider
 		if (antiSpam) {
 			if (ImGui::SliderInt("Delay", &delay, 0, 10)) {
 				delayCvar.setValue(delay);
@@ -81,13 +101,13 @@ void BetterChat::RenderSettings() {
 			ImGui::Text("\n\n");
 		}
 
-		// Bouton ChatFilter
+		// Message Filter Button
 		ImGui::Text("\n");
-		if (ImGui::Checkbox("ChatFilter", &chatFilter)) {
+		if (ImGui::Checkbox("Message Filter", &chatFilter)) {
 			chatFilterCvar.setValue(chatFilter);
 		}
 		if (ImGui::IsItemHovered()) {
-			ImGui::SetTooltip("Enable/Disable ChatFilter");
+			ImGui::SetTooltip("Enable/Disable Message Filter");
 		}
 
 		if (chatFilter) {
@@ -287,15 +307,39 @@ void BetterChat::RenderSettings() {
 				jsonFileExists();
 			}
 
-			//ImGui::Text("");
-			ImGui::Text("\nEndgame recap position:");
-
-			if (ImGui::SliderInt("X", &toxicityScoreX, 0, 1920)) {
-				toxicityScoreXCvar.setValue(toxicityScoreX);
+			// Message filter options
+			ImGui::Text("\nMessage filter options:");
+			if (ImGui::Checkbox("Disable written messages", &writtenMsg)) {
+				writtenMsgCvar.setValue(writtenMsg);
+			}
+			if (ImGui::SliderInt("Time during which 'after a save' messages are allowed after a save.", &afterSaveTime, 0, 20)) {
+				afterSaveTimeCvar.setValue(afterSaveTime);
+			}
+			if (ImGui::Checkbox("Do not count a goal if it is an owngoal", &owngoalDetection)) {
+				owngoalCvar.setValue(owngoalDetection);
+			}
+			if (ImGui::Checkbox("Do not count a pass if an opponent touch it", &unwantedPassDetection)) {
+				unwantedPassCvar.setValue(unwantedPassDetection);
 			}
 
-			if (ImGui::SliderInt("Y", &toxicityScoreY, 0, 1080)) {
-				toxicityScoreYCvar.setValue(toxicityScoreY);
+			// Toxicity Scores
+			ImGui::Text("\n");
+			if (ImGui::Checkbox("Toxicity scores", &toxicityScores)) {
+				toxicityScoresCvar.setValue(toxicityScores);
+			}
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("Enable/Disable Toxicity Scores (at the end of the game)");
+			}
+
+			if (toxicityScores) {
+				ImGui::Text("Toxicity scores options:");
+				if (ImGui::SliderInt("X", &toxicityScoreX, 0, 1920)) {
+					toxicityScoreXCvar.setValue(toxicityScoreX);
+				}
+
+				if (ImGui::SliderInt("Y", &toxicityScoreY, 0, 1080)) {
+					toxicityScoreYCvar.setValue(toxicityScoreY);
+				}
 			}
 		}
 	}

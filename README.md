@@ -1,6 +1,6 @@
 # BetterChat [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**BetterChat** is a plugin that works with **BakkesMod**, allowing you to choose which quickchats you want to disallow at which points in the game (after a goal, after a save, etc.). There is also an anti-spam function. At the end of the game, you get a recap of the number of blocked messages for each player.
+**BetterChat** is a plugin that works with **BakkesMod**, allowing you to choose which quickchats you want to disallow at which points in the game (after a goal, after a save, etc.). There is also an anti-spam function. At the end of the game, you get the toxicity score of each player (i.e. a recap of the number of blocked messages for each player).
 
 In this way, you can make the usual toxic Rocket League chat more respectful and focus on your gameplay without tilting 👍
 
@@ -24,41 +24,31 @@ You are ready to use the plugin :)
 
 #  Configuration
 
-You can configure the plugin easily by pressing F2 -> Plugins -> BetterChat Plugin. There, you can activate/deactive the plugin by checking or not the first box:
+You can configure the plugin easily by pressing F2 -> Plugins -> BetterChat Plugin.
 
-![Menu1](https://github.com/JulienML/BetterChat/assets/108280870/aac84676-04d7-4ace-8a87-f9dad6392e35)
-
-Once the box is checked, you can access to the two features, the anti-spam and the chat filter.
+Here, you can configure the two features: the anti-spam and the message filter.
 
 ## Anti-Spam
-
-You can activate/deactivate anti-spam by checking or not the "anti-spam" box.
-
-![Menu2](https://github.com/JulienML/BetterChat/assets/108280870/7898ed58-f11e-4913-b4df-a317893c6806)
-
-If you check it, you can then set the delay between two identical quickchat from the same player (default value is 5 seconds).
 
 | Without Anti-Spam | With Anti-Spam |
 | :-------------: |:-------------:|
 | ![Gif1](https://user-images.githubusercontent.com/108280870/297385991-b60ccd7b-1461-4352-8a42-d5d43518d679.gif) | ![Gif2](https://user-images.githubusercontent.com/108280870/297386150-fafc56e7-0464-4811-8598-7d1d8c21db53.gif) |
 
-## Chat Filter
+In the Anti-Spam section, you can set the delay between two identical quickchat from the same player.
 
-You can activate/deactivate the chat filter by checking or not the "Chat Filter" box.
+## Message Filter
 
-![Menu3](https://github.com/JulienML/BetterChat/assets/108280870/1eec183c-24f8-455f-98f8-94e5905b8d63)
-
-If you check it, you can then disallow the quickchat you want by checking them in the first column on the table.
-
-Once you check a quickchat, it appears in the other columns, which correspond to different events in the game. In this way, you can allow quickchat only for certain events (for exemple, you can authorize the 'What a save!' quickchat only after a save).
-
-| Without the Chat Filter | With the Chat Filter |
+| Without the Message Filter | With the Message Filter |
 | :-------------: |:-------------:|
 | ![Gif3](https://user-images.githubusercontent.com/108280870/297386506-b0152ce6-dd2c-41ab-b528-f302037bab8c.gif) | ![Gif4](https://user-images.githubusercontent.com/108280870/297386316-dc14da4c-5fab-49f0-ae75-6e4aec44fe33.gif) |
 
-At the bottom, you can configure the position of the endgame recap of the number of blocked messages.
+In the Message Filter section, you can disallow the quickchat you want by checking them in the first column on the table.
 
-![Menu4](https://github.com/JulienML/BetterChat/assets/108280870/222a4b40-2e84-410a-95ea-2babe5af5f90)
+Once you check a quickchat, it appears in the other columns, which correspond to different events in the game. In this way, you can allow quickchat only for certain events (for exemple, you can authorize the 'What a save!' quickchat only after a save).
+
+![Menu3](https://github.com/JulienML/BetterChat/assets/108280870/55e854ac-9a82-45db-87f8-a2130453f0f2)
+
+At the bottom, you can configure the position of the toxicity scores at the end of the game:
 
 ![Menu5](https://github.com/JulienML/BetterChat/assets/108280870/4fdb965d-8cb5-4e34-a509-7903a4f9eba5)
 

@@ -84,7 +84,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	virtual void onLoad();
 	virtual void onUnload();
 
-	void cancelMsg();
+	void handleMsg(bool cancel, std::string playerName);
 
 	void gameBegin();
 	void gameEnd();
@@ -92,6 +92,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	void onStatTickerMessage(ServerWrapper caller, void* args);
 	void hitBall(CarWrapper car, void* params);
 	void replayEnd();
+	void onTimerUpdate();
 	void onGoal();
 
 	void gameDestroyed();
