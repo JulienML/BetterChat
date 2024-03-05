@@ -187,7 +187,7 @@ void BetterChat::gameBegin() {
 	numTeam = gameWrapper->GetLocalCar().GetPRI().GetTeamNum();
 	blueScore = 0;
 	orangeScore = 0;
-	replayEnded = false;
+	replayEnded = true;
 	goal = false;
 	assist = false;
 	lastTouchTeam = -1;
@@ -355,18 +355,15 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 		canvas.SetPosition(Vector2({ x + 300, y }));
 		canvas.DrawString("Ratio", 1, 1);
 
-		LinearColor blueTeam = LinearColor(0, 75, 255, 255);
-		LinearColor orangeTeam = LinearColor(255, 165, 0, 255);
+		// LinearColor blueTeam = LinearColor(0, 75, 255, 255);
+		// LinearColor orangeTeam = LinearColor(255, 165, 0, 255);
 
 		map<string, pInfos>::iterator player;
 		for (player = playerInfo.begin(); player != playerInfo.end(); ++player) {
 
-			if (player->second.teamNum == 0) {
-				canvas.SetColor(blueTeam);
-			}
-			else {
-				canvas.SetColor(orangeTeam);
-			}
+			LinearColor linearTeamColor = gameWrapper->GetOnlineGame().GetTeams().Get(player->second.teamNum).GetFontColor();
+			linearTeamColor = LinearColor((int)(linearTeamColor.R * 255), (int)(linearTeamColor.G * 255), (int)(linearTeamColor.B * 255), 255);
+			canvas.SetColor(linearTeamColor);
 
 			canvas.SetPosition(Vector2({ x, y + 20 * (int)distance(playerInfo.begin(), playerInfo.find(player->first)) + 20 }));
 			canvas.DrawString(player->first, 1, 1);
@@ -529,7 +526,6 @@ struct ChatMessage2 {
 void BetterChat::handleMsg(bool cancel, std::string playerName) {
 	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.GFxData_Chat_TA.OnChatMessage", [this, cancel, playerName](ActorWrapper Caller, void* params, ...) {
 		ChatMessage2* Params = (ChatMessage2*)params;
-		LOG("ChatMessage2: " + Params->PlayerName.ToString());
 		if(cancel) { // If the message has to be cancelled
 			Params->Message = FS("");
 			Params->PlayerName = FS("");
@@ -567,7 +563,7 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 
 		bool cancel = false;
 
-		regex quickchat_pattern("^Group\\dMessage\\d$");
+		regex quickchat_pattern("^Group\\dMessage\\d\\d?$");
 		if (regex_match(msgID, quickchat_pattern)) // If it is a quickchat
 		{
 			if (msgID != playerInfo[playerName].previousMsg) { // Different message
