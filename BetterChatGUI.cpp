@@ -72,8 +72,23 @@ void BetterChat::RenderSettings() {
 	if (!toxicityScoreYCvar) { return; }
 	int toxicityScoreY = toxicityScoreYCvar.getIntValue();
 
+	list<string> categories = {"quickchats" , "default", "beforeKickoff", "afterAlliedGoal", "afterEnemyGoal", "afterPass", "afterSave"};
+	
+	map<string, bool> defaultCheck = readJson("default");
+	map<string, bool> beforeKickoffCheck = readJson("beforeKickoff");
+	map<string, bool> afterAlliedGoalCheck = readJson("afterAlliedGoal");
+	map<string, bool> afterEnemyGoalCheck = readJson("afterEnemyGoal");
+	map<string, bool> afterPassCheck = readJson("afterPass");
+	map<string, bool> afterSaveCheck = readJson("afterSave");
+	
+	map<string, map<string, bool>> maps = { {"default", defaultCheck}, {"beforeKickoff", beforeKickoffCheck}, { "afterAlliedGoal", afterAlliedGoalCheck }, {"afterEnemyGoal", afterEnemyGoalCheck}, {"afterPass", afterPassCheck}, {"afterSave", afterSaveCheck} };
+
 	if (enabled) {
 		ImGui::Text("\n");
+
+		/*if (ImGui::BeginTabBar("tabBar")) {
+			if (ImGui::BeginTabItem("1v1")) {*/
+		ImGui::PushID("1v1");
 
 		// AntiSpam button
 		if (ImGui::Checkbox("AntiSpam", &antiSpam)) {
@@ -112,197 +127,111 @@ void BetterChat::RenderSettings() {
 
 		if (chatFilter) {
 			ImGui::Text("\n");
-
-			// 1st header
-			ImGui::Columns(2, nullptr);
-
-			ImGui::Separator();
-			ImGui::Text("These quickchats are");
-			ImGui::SetColumnWidth(-1, 165);
-			ImGui::NextColumn();
-			ImGui::Text("Except in these situations:");
-			ImGui::SetColumnWidth(-1, 825);
-			ImGui::NextColumn();
-
-			// 2nd header
-			ImGui::Columns(6, nullptr);
-
-			ImGui::Text("forbidden:");
-			ImGui::SetColumnWidth(-1, 165);
-			ImGui::NextColumn();
-			ImGui::Text("Before kickoff:");
-			ImGui::SetColumnWidth(-1, 165);
-			ImGui::NextColumn();
-			ImGui::Text("After an allied goal:");
-			ImGui::SetColumnWidth(-1, 165);
-			ImGui::NextColumn();
-			ImGui::Text("After an enemy goal:");
-			ImGui::SetColumnWidth(-1, 165);
-			ImGui::NextColumn();
-			ImGui::Text("After an assist:");
-			ImGui::SetColumnWidth(-1, 165);
-			ImGui::NextColumn();
-			ImGui::Text("After a save:");
-			ImGui::SetColumnWidth(-1, 165);
-			ImGui::NextColumn();
-			ImGui::Separator();
-
-			// Default
-
-			map<string, bool> defaultMsgCheck;
-			set<string> defaultMsg = readJson("default");
-			for (const auto& pair : BetterChat::idQuickchats) {
-				const string& id = pair.first;
-				bool check = defaultMsg.find(id) != defaultMsg.end();
-				defaultMsgCheck.emplace(id, check);
+			
+			ImGui::BeginChild("Quickchats", ImVec2(755, 450), true, ImGuiWindowFlags_MenuBar); ;
+			if (ImGui::BeginMenuBar())
+			{
+				ImGui::Text("Configuration");
+				ImGui::EndMenuBar();
 			}
 
-			ImGui::PushID("defaultColumn");
-			for (const auto& pair : defaultMsgCheck) {
-				const string msg = pair.first;
-				bool defaultCheckbox = defaultMsgCheck[msg];
-				if (ImGui::Checkbox(BetterChat::idQuickchats[msg].c_str(), &defaultCheckbox)) {
-					if (defaultCheckbox) {
-						addToJson("default", msg);
-					}
-					else {
-						removeFromJson("default", msg);
-					}
-					resetBlacklist();
-				}
-			}
-			ImGui::PopID();
+			float headerOffsetX;			
+			float headerOffsetY = ImGui::GetTextLineHeight() * 0.5f + 2;
+
+			ImGui::Columns(7, nullptr);
+
+			ImGui::SetColumnWidth(-1, 150);																						   
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("Quickchats").x) * 0.5f;								   
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerOffsetY);
+			ImGui::Text("Quickchats");																							   
+			ImGui::NextColumn();																								   
+			ImGui::SetColumnWidth(-1, 100);																						   
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("Default").x) * 0.5f;								   
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerOffsetY);
+			ImGui::Text("Default");																								   
 			ImGui::NextColumn();
-
-			// Before kick-off
-
-			map<string, bool> beforeKickoffMsgCheck;
-			set<string> beforeKickoffMsg = readJson("beforeKickoff");
-			for (const string& id : defaultMsg) {
-				bool check = beforeKickoffMsg.find(id) != beforeKickoffMsg.end();
-				beforeKickoffMsgCheck.emplace(id, check);
-			}
-
-			ImGui::PushID("beforeKickoffColumn");
-			for (const auto& pair : beforeKickoffMsgCheck) {
-				const string msg = pair.first;
-				bool checkbox = beforeKickoffMsgCheck[msg];
-				if (ImGui::Checkbox(BetterChat::idQuickchats[msg].c_str(), &checkbox)) {
-					if (checkbox) {
-						addToJson("beforeKickoff", msg);
-					}
-					else {
-						removeFromJson("beforeKickoff", msg);
-					}
-				}
-			}
-			ImGui::PopID();
+			ImGui::SetColumnWidth(-1, 100);
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("Before kickoff").x) * 0.5f;
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerOffsetY);
+			ImGui::Text("Before kickoff");
 			ImGui::NextColumn();
-
-			// After an allied goal
-
-			map<string, bool> afterAlliedGoalMsgCheck;
-			set<string> afterAlliedGoalMsg = readJson("afterAlliedGoal");
-			for (const string& id : defaultMsg) {
-				bool check = afterAlliedGoalMsg.find(id) != afterAlliedGoalMsg.end();
-				afterAlliedGoalMsgCheck.emplace(id, check);
-			}
-
-			ImGui::PushID("afterAlliedGoalColumn");
-			for (const auto& pair : afterAlliedGoalMsgCheck) {
-				const string msg = pair.first;
-				bool checkbox = afterAlliedGoalMsgCheck[msg];
-				if (ImGui::Checkbox(BetterChat::idQuickchats[msg].c_str(), &checkbox)) {
-					if (checkbox) {
-						addToJson("afterAlliedGoal", msg);
-					}
-					else {
-						removeFromJson("afterAlliedGoal", msg);
-					}
-				}
-			}
-			ImGui::PopID();
+			ImGui::SetColumnWidth(-1, 100);
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("After an allied").x) * 0.5f;
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::Text("After an allied");
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("goal").x) * 0.5f;
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::Text("goal");
 			ImGui::NextColumn();
-
-			// After an enemy goal
-
-			map<string, bool> afterEnemyGoalMsgCheck;
-			set<string> afterEnemyGoalMsg = readJson("afterEnemyGoal");
-			for (const string& id : defaultMsg) {
-				bool check = afterEnemyGoalMsg.find(id) != afterEnemyGoalMsg.end();
-				afterEnemyGoalMsgCheck.emplace(id, check);
-			}
-
-			ImGui::PushID("afterEnemyGoalColumn");
-			for (const auto& pair : afterEnemyGoalMsgCheck) {
-				const string msg = pair.first;
-				bool checkbox = afterEnemyGoalMsgCheck[msg];
-				if (ImGui::Checkbox(BetterChat::idQuickchats[msg].c_str(), &checkbox)) {
-					if (checkbox) {
-						addToJson("afterEnemyGoal", msg);
-					}
-					else {
-						removeFromJson("afterEnemyGoal", msg);
-					}
-				}
-			}
-			ImGui::PopID();
+			ImGui::SetColumnWidth(-1, 100);
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("After an enemy").x) * 0.5f;
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::Text("After an enemy");
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("goal").x) * 0.5f;
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::Text("goal");
 			ImGui::NextColumn();
-
-			// After an assist
-
-			map<string, bool> afterPassMsgCheck;
-			set<string> afterPassMsg = readJson("afterPass");
-			for (const string& id : defaultMsg) {
-				bool check = afterPassMsg.find(id) != afterPassMsg.end();
-				afterPassMsgCheck.emplace(id, check);
-			}
-
-			ImGui::PushID("afterPassColumn");
-			for (const auto& pair : afterPassMsgCheck) {
-				const string msg = pair.first;
-				bool checkbox = afterPassMsgCheck[msg];
-				if (ImGui::Checkbox(BetterChat::idQuickchats[msg].c_str(), &checkbox)) {
-					if (checkbox) {
-						addToJson("afterPass", msg);
-					}
-					else {
-						removeFromJson("afterPass", msg);
-					}
-				}
-			}
-			ImGui::PopID();
+			ImGui::SetColumnWidth(-1, 100);
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("After an assist").x) * 0.5f;
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerOffsetY);
+			ImGui::Text("After an assist");
 			ImGui::NextColumn();
-
-			// After a save
-
-			map<string, bool> afterSaveMsgCheck;
-			set<string> afterSaveMsg = readJson("afterSave");
-			for (const string& id : defaultMsg) {
-				bool check = afterSaveMsg.find(id) != afterSaveMsg.end();
-				afterSaveMsgCheck.emplace(id, check);
-			}
-
-			ImGui::PushID("afterSaveColumn");
-			for (const auto& pair : afterSaveMsgCheck) {
-				const string msg = pair.first;
-				bool checkbox = afterSaveMsgCheck[msg];
-				if (ImGui::Checkbox(BetterChat::idQuickchats[msg].c_str(), &checkbox)) {
-					if (checkbox) {
-						addToJson("afterSave", msg);
-					}
-					else {
-						removeFromJson("afterSave", msg);
-					}
-				}
-			}
-			ImGui::PopID();
+			ImGui::SetColumnWidth(-1, 100);
+			headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("After a save").x) * 0.5f;
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerOffsetY);
+			ImGui::Text("After a save");
 			ImGui::NextColumn();
 			ImGui::Separator();
+
+			for (const auto& chat : idQuickchats) {
+				for (const string column : categories) {
+					ImGui::PushID(column.c_str());
+					if (column == "quickchats") {
+						float textOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize(chat.second.c_str()).x) * 0.5f;
+						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textOffsetX - 6);
+						ImGui::Text(chat.second.c_str());
+					}
+					else {
+						const string msg = chat.first;
+						map<string, bool> map = maps[column];
+						bool check = map[msg];
+						string btn = check ? "Allowed" : "Forbidden";
+						if (check) {
+							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.2f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.3f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.7f, 0.1f, 1.0f));
+						}
+						else {
+							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+							ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
+						}
+
+						ImGui::PushID(msg.c_str());
+						float btnOffsetX = (ImGui::GetColumnWidth() - 80) * 0.5f;
+						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + btnOffsetX - 6);
+						if (ImGui::Button(btn.c_str(), ImVec2(80, 18))) {
+							toggleQuickchatInJson(column, msg);
+							resetWhitelist();
+						}
+						ImGui::PopID();
+						ImGui::PopStyleColor(3);
+					}
+					ImGui::PopID();
+					ImGui::NextColumn();
+				}
+			}
+			ImGui::EndChild();
+			//ImGui::Separator();
 			ImGui::Columns(1, nullptr);
 
 			if (ImGui::Button("Reset table")) {
-				string path = gameWrapper->GetDataFolder().string() + "/BetterChat_Blacklist.json";
+				string path = gameWrapper->GetDataFolder().string() + "/BetterChat_config.json";
 				remove(path.c_str());
 				jsonFileExists();
 			}
@@ -342,5 +271,19 @@ void BetterChat::RenderSettings() {
 				}
 			}
 		}
+		ImGui::PopID();
+				/*ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("2v2")) {
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("3v3")) {
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
+		}*/
 	}
 }

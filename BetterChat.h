@@ -10,7 +10,6 @@
 #include <string>
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
 
-
 class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginSettingsWindow
 {
 	// Quickchats id <=> Quickchats texts
@@ -74,12 +73,12 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	};
 
 	//Functions
-	void resetBlacklist();
+
+	void resetWhitelist();
 
 	void jsonFileExists();
-	std::set<std::string> readJson(std::string category);
-	bool addToJson(std::string category, std::string idMsg);
-	bool removeFromJson(std::string category, std::string idMsg);
+	std::map<std::string, bool> readJson(std::string category);
+	void toggleQuickchatInJson(std::string category, std::string idMsg);
 
 	virtual void onLoad();
 	virtual void onUnload();

@@ -42,11 +42,9 @@ In the Anti-Spam section, you can set the delay between two identical quickchat 
 | :-------------: |:-------------:|
 | ![Gif3](https://user-images.githubusercontent.com/108280870/297386506-b0152ce6-dd2c-41ab-b528-f302037bab8c.gif) | ![Gif4](https://user-images.githubusercontent.com/108280870/297386316-dc14da4c-5fab-49f0-ae75-6e4aec44fe33.gif) |
 
-In the Message Filter section, you can disallow the quickchat you want by checking them in the first column on the table.
+In the Message Filter section, you can allow/disallow the quickchat you want at the moment you want by pressing the corresponding button:
 
-Once you check a quickchat, it appears in the other columns, which correspond to different events in the game. In this way, you can allow quickchat only for certain events (for exemple, you can authorize the 'What a save!' quickchat only after a save).
-
-![Menu3](https://github.com/JulienML/BetterChat/assets/108280870/55e854ac-9a82-45db-87f8-a2130453f0f2)
+![Menu3](https://github.com/JulienML/BetterChat/assets/108280870/12da1a67-6017-4221-8529-1a4e5d4140c8)
 
 At the bottom, you can configure the position of the toxicity scores at the end of the game:
 
