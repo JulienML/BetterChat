@@ -53,7 +53,8 @@ void BetterChat::onLoad()
 	cvarManager->registerCvar("betterchat_antispam", "1", "Enable AntiSpam", true, true, 0, true, 1);
 	cvarManager->registerCvar("betterchat_chatfilter", "1", "Enable ChatFilter", true, true, 0, true, 1);
 	cvarManager->registerCvar("betterchat_delay", "5", "Delay between two same messages from the same player", true, true, 0, true, 10);
-	cvarManager->registerCvar("betterchat_writtenmsg", "0", "Disable written messages", true, true, 0, true, 1);
+	cvarManager->registerCvar("betterchat_nowrittenmsg", "0", "Disable written messages", true, true, 0, true, 1);
+	cvarManager->registerCvar("betterchat_writtenmsgastoxic", "0", "Consider written messages as toxic", true, true, 0, true, 1);
 	cvarManager->registerCvar("betterchat_aftersavetime", "5", "Time the 'After save' messages are allowed after a save", true, true, 0, true, 20);
 	cvarManager->registerCvar("betterchat_owngoal", "0", "Do not count the goal if it is an owngoal", true, true, 0, true, 1);
 	cvarManager->registerCvar("betterchat_unwanted_pass", "0", "Do not count the pass if an opponent touch it before the goal", true, true, 0, true, 1);
@@ -80,10 +81,15 @@ void BetterChat::onLoad()
 void BetterChat::onUnload()
 {
 	LOG("Plugin Off");
-	gameWrapper->UnhookEvent("Function TAGame.HUDBase_TA.OnChatMessage");
-	gameWrapper->UnhookEvent("Function TAGame.GFxData_Chat_TA.OnChatMessage");
 	gameWrapper->UnhookEvent("Function GameEvent_TA.Countdown.BeginState");
 	gameWrapper->UnhookEvent("Function TAGame.GFxHUD_TA.HandleStatTickerMessage");
+	gameWrapper->UnhookEvent("Function TAGame.HUDBase_TA.OnChatMessage");
+	gameWrapper->UnhookEvent("Function TAGame.Replay_TA.StopPlayback");
+	gameWrapper->UnhookEvent("Function TAGame.Car_TA.EventHitBall");
+	gameWrapper->UnhookEvent("Function TAGame.GameEvent_Soccar_TA.OnGameTimeUpdated");
+	gameWrapper->UnhookEvent("Function TAGame.Ball_TA.OnHitGoal");
+	gameWrapper->UnhookEvent("Function TAGame.GameEvent_TA.Destroyed");
+	gameWrapper->UnhookEvent("Function TAGame.GameEvent_Soccar_TA.OnMatchWinnerSet");
 }
 
 /// <summary>
@@ -568,13 +574,12 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 			delay = std::chrono::seconds(0);
 		}
 
-		playerInfo[playerName].numMsg += 1;
-
 		bool cancel = false;
 
 		regex quickchat_pattern("^Group\\dMessage\\d\\d?$");
 		if (regex_match(msgID, quickchat_pattern)) // If it is a quickchat
 		{
+			playerInfo[playerName].numMsg += 1;
 			if (msgID != playerInfo[playerName].previousMsg) { // Different message
 				playerInfo[playerName].previousMsg = msgID;
 				playerInfo[playerName].previousTime = chrono::system_clock::now();
@@ -599,9 +604,12 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 			}
 		}
 		else {
-			if (cvarManager->getCvar("betterchat_writtenmsg").getBoolValue()) {
+			if (cvarManager->getCvar("betterchat_nowrittenmsg").getBoolValue()) {
 				cancel = true;
-				playerInfo[playerName].blockedMsg += 1;
+			}
+			if(cvarManager->getCvar("betterchat_writtenmsgastoxic").getBoolValue()) {
+				if (cancel) playerInfo[playerName].blockedMsg += 1;
+				playerInfo[playerName].numMsg += 1;
 			}
 		}
 		handleMsg(cancel, playerName);

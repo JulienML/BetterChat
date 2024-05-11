@@ -44,9 +44,13 @@ void BetterChat::RenderSettings() {
 	if (!delayCvar) { return; }
 	int delay = delayCvar.getIntValue();
 
-	CVarWrapper writtenMsgCvar = cvarManager->getCvar("betterchat_writtenmsg");
-	if (!writtenMsgCvar) { return; }
-	bool writtenMsg = writtenMsgCvar.getBoolValue();
+	CVarWrapper noWrittenMsgCvar = cvarManager->getCvar("betterchat_nowrittenmsg");
+	if (!noWrittenMsgCvar) { return; }
+	bool noWrittenMsg = noWrittenMsgCvar.getBoolValue();
+
+	CVarWrapper writtenMsgAsToxicCvar = cvarManager->getCvar("betterchat_writtenmsgastoxic");
+	if (!writtenMsgAsToxicCvar) { return; }
+	bool writtenMsgAsToxic = writtenMsgAsToxicCvar.getBoolValue();
 
 	CVarWrapper afterSaveTimeCvar = cvarManager->getCvar("betterchat_aftersavetime");
 	if (!afterSaveTimeCvar) { return; }
@@ -238,8 +242,14 @@ void BetterChat::RenderSettings() {
 
 			// Message filter options
 			ImGui::Text("\nMessage filter options:");
-			if (ImGui::Checkbox("Disable written messages", &writtenMsg)) {
-				writtenMsgCvar.setValue(writtenMsg);
+			if (ImGui::Checkbox("Block written messages", &noWrittenMsg)) {
+				noWrittenMsgCvar.setValue(noWrittenMsg);
+			}
+			if (ImGui::Checkbox("Count written messages in the toxicity scores", &writtenMsgAsToxic)) {
+				writtenMsgAsToxicCvar.setValue(writtenMsgAsToxic);
+			}
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("If enabled, written messages will be considered as toxic if 'Block written messages' option is enabled, and as normal if not.");
 			}
 			if (ImGui::SliderInt("Time during which 'after a save' messages are allowed after a save.", &afterSaveTime, 0, 20)) {
 				afterSaveTimeCvar.setValue(afterSaveTime);
