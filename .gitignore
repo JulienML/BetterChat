@@ -1,4 +1,6 @@
 .vs/
 .vscode/
 build/
+.gitignore
 README BakkesPlugins.md
+crash.txt

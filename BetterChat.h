@@ -93,6 +93,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	void replayEnd();
 	void onTimerUpdate();
 	void onGoal();
+	void onOvertimeStarted();
 
 	void gameDestroyed();
 	void ShowToxicityScores(CanvasWrapper canvas);

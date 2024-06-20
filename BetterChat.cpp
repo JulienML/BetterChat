@@ -73,6 +73,7 @@ void BetterChat::onLoad()
 	gameWrapper->HookEventWithCallerPost<CarWrapper>("Function TAGame.Car_TA.EventHitBall", bind(&BetterChat::hitBall, this, std::placeholders::_1, std::placeholders::_2));
 	gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.OnGameTimeUpdated", bind(&BetterChat::onTimerUpdate, this));
 	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.Ball_TA.OnHitGoal", bind(&BetterChat::onGoal, this));
+	gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.OnOvertimeUpdated", std::bind(&BetterChat::onOvertimeStarted, this));
 	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.GameEvent_TA.Destroyed", bind(&BetterChat::gameDestroyed, this));
 	gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.OnMatchWinnerSet", bind(&BetterChat::gameEnd, this));
 	LOG("Plugin On");
@@ -187,6 +188,7 @@ void BetterChat::gameBegin() {
 	blueScore = 0;
 	orangeScore = 0;
 	replayEnded = true;
+	replayEnd();
 	goal = false;
 	assist = false;
 	lastTouchTeam = -1;
@@ -319,6 +321,13 @@ void BetterChat::onTimerUpdate() {
 		save = false;
 		resetWhitelist();
 	}
+}
+
+// Overtime
+void BetterChat::onOvertimeStarted() {
+	if (!gameWrapper->IsInOnlineGame()) { return; }
+	LOG("[EVENT] Overtime");
+	replayEnd();
 }
 
 // Replay end
@@ -537,8 +546,8 @@ void BetterChat::handleMsg(bool cancel, std::string playerName) {
 	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.GFxData_Chat_TA.OnChatMessage", [this, cancel, playerName](ActorWrapper Caller, void* params, ...) {
 		ChatMessage2* Params = (ChatMessage2*)params;
 		if(cancel) { // If the message has to be cancelled
-			Params->Message = FS("");
 			Params->PlayerName = FS("");
+			Params->Message = FS("");
 			Params->ChatChannel = 0;
 		}
 		if (playerInfo[playerName].numMsg == 1) { // If it is the first message sent by this player
