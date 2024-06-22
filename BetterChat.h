@@ -107,12 +107,133 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		uintptr_t StatEvent;
 	};
 
-	// structure of a stat event
-	struct StatEventParams {
-		// always primary player
-		uintptr_t PRI;
-		// wrapper for the stat event
-		uintptr_t StatEvent;
+	struct FHUDChatMessage
+	{
+		void* PRI;
+		void* Team;
+		wchar_t* PlayerName;
+		uint8_t PlayerNamePadding[0x8];
+		wchar_t* Message;
+		uint8_t MessagePadding[0x8];
+		uint8_t ChatChannel;
+		unsigned long bPreset : 1;
+	};
+
+	struct FString
+	{
+	public:
+		using ElementType = const wchar_t;
+		using ElementPointer = ElementType*;
+
+	private:
+		ElementPointer ArrayData;
+		int32_t ArrayCount;
+		int32_t ArrayMax;
+
+	public:
+		FString()
+		{
+			ArrayData = nullptr;
+			ArrayCount = 0;
+			ArrayMax = 0;
+		}
+
+		FString(ElementPointer other)
+		{
+			ArrayData = nullptr;
+			ArrayCount = 0;
+			ArrayMax = 0;
+
+			ArrayMax = ArrayCount = *other ? (wcslen(other) + 1) : 0;
+
+			if (ArrayCount > 0)
+			{
+				ArrayData = other;
+			}
+		}
+
+		~FString() {}
+
+	public:
+		std::string ToString() const
+		{
+			if (!IsValid())
+			{
+				std::wstring wideStr(ArrayData);
+				std::string str(wideStr.begin(), wideStr.end());
+				return str;
+			}
+
+			return std::string("null");
+		}
+
+		bool IsValid() const
+		{
+			return !ArrayData;
+		}
+
+		FString operator=(ElementPointer other)
+		{
+			if (ArrayData != other)
+			{
+				ArrayMax = ArrayCount = *other ? (wcslen(other) + 1) : 0;
+
+				if (ArrayCount > 0)
+				{
+					ArrayData = other;
+				}
+			}
+
+			return *this;
+		}
+
+		bool operator==(const FString& other)
+		{
+			return (!wcscmp(ArrayData, other.ArrayData));
+		}
+	};
+
+	FString FS(const std::string& s) {
+		wchar_t* p = new wchar_t[s.size() + 1];
+		for (std::string::size_type i = 0; i < s.size(); ++i)
+			p[i] = s[i];
+
+		p[s.size()] = '\0';
+		return FString(p);
+	}
+
+	struct FSceNpOnlineId
+	{
+		uint64_t                                           Data[0x2];                                        		// 0x0000 (0x0010) [0x0000000000000000]               
+		uint8_t                                            Term;                                             		// 0x0010 (0x0001) [0x0000000000000000]               
+		uint8_t                                            Dummy[0x3];                                       		// 0x0011 (0x0003) [0x0000000000000000]               
+	};
+
+	struct FSceNpId
+	{
+		struct FSceNpOnlineId                              Handle;                                           		// 0x0000 (0x0018) [0x0000000000000002] (CPF_Const)   
+		uint64_t                                           Opt;                                              		// 0x0018 (0x0008) [0x0000000000000002] (CPF_Const)   
+		uint64_t                                           Reserved;                                         		// 0x0020 (0x0008) [0x0000000000000002] (CPF_Const)   
+	};
+
+	struct FUniqueNetId
+	{
+		uint64_t                                           Uid;                                              		// 0x0000 (0x0008) [0x0000000000000000]               
+		struct FSceNpId                                    NpId;                                             		// 0x0008 (0x0028) [0x0000000000000000]               
+		struct FString                                     EpicAccountId;                                    		// 0x0030 (0x0010) [0x0000000000400000] (CPF_NeedCtorLink)
+		uint8_t                                            Platform;                                         		// 0x0040 (0x0001) [0x0000000000000000]               
+		uint8_t                                            SplitscreenID;                                    		// 0x0041 (0x0001) [0x0000000000000000]               
+	};
+
+	struct FGFxChatMessage {
+		int32_t Team;
+		class FString PlayerName;
+		class FString Message;
+		uint8_t ChatChannel;
+		bool bLocalPlayer : 1;
+		struct FUniqueNetId SenderID;
+		uint8_t MessageType;
+		class FString TimeStamp;
 	};
 
 	//Interface

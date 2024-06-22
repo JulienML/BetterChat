@@ -430,125 +430,17 @@ void BetterChat::gameDestroyed() {
 	gameWrapper->UnregisterDrawables();
 }
 
-//
-// Chat manipulation
-//
-
-struct FString
-{
-public:
-	using ElementType = const wchar_t;
-	using ElementPointer = ElementType*;
-
-private:
-	ElementPointer ArrayData;
-	int32_t ArrayCount;
-	int32_t ArrayMax;
-
-public:
-	FString()
-	{
-		ArrayData = nullptr;
-		ArrayCount = 0;
-		ArrayMax = 0;
-	}
-
-	FString(ElementPointer other)
-	{
-		ArrayData = nullptr;
-		ArrayCount = 0;
-		ArrayMax = 0;
-
-		ArrayMax = ArrayCount = *other ? (wcslen(other) + 1) : 0;
-
-		if (ArrayCount > 0)
-		{
-			ArrayData = other;
-		}
-	}
-
-	~FString() {}
-
-public:
-	std::string ToString() const
-	{
-		if (!IsValid())
-		{
-			std::wstring wideStr(ArrayData);
-			std::string str(wideStr.begin(), wideStr.end());
-			return str;
-		}
-
-		return std::string("null");
-	}
-
-	bool IsValid() const
-	{
-		return !ArrayData;
-	}
-
-	FString operator=(ElementPointer other)
-	{
-		if (ArrayData != other)
-		{
-			ArrayMax = ArrayCount = *other ? (wcslen(other) + 1) : 0;
-
-			if (ArrayCount > 0)
-			{
-				ArrayData = other;
-			}
-		}
-
-		return *this;
-	}
-
-	bool operator==(const FString& other)
-	{
-		return (!wcscmp(ArrayData, other.ArrayData));
-	}
-};
-
-FString FS(const std::string& s) {
-	wchar_t* p = new wchar_t[s.size() + 1];
-	for (std::string::size_type i = 0; i < s.size(); ++i)
-		p[i] = s[i];
-
-	p[s.size()] = '\0';
-	return FString(p);
-}
-
-struct ChatMessage1
-{
-	void* PRI;
-	void* Team;
-	wchar_t* PlayerName;
-	uint8_t PlayerNamePadding[0x8];
-	wchar_t* Message;
-	uint8_t MessagePadding[0x8];
-	uint8_t ChatChannel;
-	unsigned long bPreset : 1;
-};
-
-struct ChatMessage2 {
-	int32_t Team;
-	class FString PlayerName;
-	class FString Message;
-	uint8_t ChatChannel;
-	bool bLocalPlayer : 1;
-	unsigned char IDPadding[0x48];
-	uint8_t MessageType;
-};
-
 /// <summary>
-/// Erase a quickchat message
+/// Erase a chat message
 /// </summary>
 void BetterChat::handleMsg(bool cancel, std::string playerName) {
 	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.GFxData_Chat_TA.OnChatMessage", [this, cancel, playerName](ActorWrapper Caller, void* params, ...) {
-		ChatMessage2* Params = (ChatMessage2*)params;
+		FGFxChatMessage* Params = (FGFxChatMessage*)params;
 		if(cancel) { // If the message has to be cancelled
 			Params->PlayerName = FS("");
 			Params->Message = FS("");
 			Params->ChatChannel = 0;
+			Params->TimeStamp = FS("");
 		}
 		if (playerInfo[playerName].numMsg == 1) { // If it is the first message sent by this player
 			playerInfo[playerName].teamNum = (unsigned char)Params->Team;
@@ -562,13 +454,13 @@ void BetterChat::handleMsg(bool cancel, std::string playerName) {
 void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 	if (params) {
 
-		ChatMessage1* chatMessage = static_cast<ChatMessage1*>(params);
-		if (chatMessage->PlayerName == nullptr) return;
-		std::wstring player(chatMessage->PlayerName);
+		FHUDChatMessage* chatMessageParams = static_cast<FHUDChatMessage*>(params);
+		if (chatMessageParams->PlayerName == nullptr) return;
+		std::wstring player(chatMessageParams->PlayerName);
 		std::string playerName(player.begin(), player.end());
 
-		if (chatMessage->Message == nullptr) return;
-		std::wstring message(chatMessage->Message);
+		if (chatMessageParams->Message == nullptr) return;
+		std::wstring message(chatMessageParams->Message);
 		std::string msgID(message.begin(), message.end());
 
 		if (!cvarManager->getCvar("betterchat_enabled").getBoolValue()) {
