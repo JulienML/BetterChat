@@ -32,41 +32,7 @@ void BetterChat::RenderSettings() {
 		ImGui::SetTooltip("Enable/Disable BetterChat Plugin");
 	}
 
-	CVarWrapper antiSpamCvar = cvarManager->getCvar("betterchat_antispam");
-	if (!antiSpamCvar) { return; }
-	bool antiSpam = antiSpamCvar.getBoolValue();
-
-	CVarWrapper chatFilterCvar = cvarManager->getCvar("betterchat_chatfilter");
-	if (!chatFilterCvar) { return; }
-	bool chatFilter = chatFilterCvar.getBoolValue();
-
-	CVarWrapper delayCvar = cvarManager->getCvar("betterchat_delay");
-	if (!delayCvar) { return; }
-	int delay = delayCvar.getIntValue();
-
-	CVarWrapper noWrittenMsgCvar = cvarManager->getCvar("betterchat_nowrittenmsg");
-	if (!noWrittenMsgCvar) { return; }
-	bool noWrittenMsg = noWrittenMsgCvar.getBoolValue();
-
-	CVarWrapper writtenMsgAsToxicCvar = cvarManager->getCvar("betterchat_writtenmsgastoxic");
-	if (!writtenMsgAsToxicCvar) { return; }
-	bool writtenMsgAsToxic = writtenMsgAsToxicCvar.getBoolValue();
-
-	CVarWrapper afterSaveTimeCvar = cvarManager->getCvar("betterchat_aftersavetime");
-	if (!afterSaveTimeCvar) { return; }
-	int afterSaveTime = afterSaveTimeCvar.getIntValue();
-
-	CVarWrapper owngoalCvar = cvarManager->getCvar("betterchat_owngoal");
-	if (!owngoalCvar) { return; }
-	bool owngoalDetection = owngoalCvar.getBoolValue();
-
-	CVarWrapper unwantedPassCvar = cvarManager->getCvar("betterchat_unwanted_pass");
-	if (!unwantedPassCvar) { return; }
-	bool unwantedPassDetection = unwantedPassCvar.getBoolValue();
-
-	CVarWrapper toxicityScoresCvar = cvarManager->getCvar("betterchat_toxicityscores");
-	if (!toxicityScoresCvar) { return; }
-	bool toxicityScores = toxicityScoresCvar.getBoolValue();
+	BetterChatParams pluginParams = getParamsInJson("Default config");
 
 	CVarWrapper toxicityScoreXCvar = cvarManager->getCvar("betterchat_score_X");
 	if (!toxicityScoreXCvar) { return; }
@@ -78,42 +44,40 @@ void BetterChat::RenderSettings() {
 
 	list<string> categories = {"quickchats" , "default", "beforeKickoff", "afterAlliedGoal", "afterEnemyGoal", "afterPass", "afterSave"};
 	
-	map<string, bool> defaultCheck = readJson("default");
-	map<string, bool> beforeKickoffCheck = readJson("beforeKickoff");
-	map<string, bool> afterAlliedGoalCheck = readJson("afterAlliedGoal");
-	map<string, bool> afterEnemyGoalCheck = readJson("afterEnemyGoal");
-	map<string, bool> afterPassCheck = readJson("afterPass");
-	map<string, bool> afterSaveCheck = readJson("afterSave");
+	map<string, bool> defaultCheck = readMapInJson("default");
+	map<string, bool> beforeKickoffCheck = readMapInJson("beforeKickoff");
+	map<string, bool> afterAlliedGoalCheck = readMapInJson("afterAlliedGoal");
+	map<string, bool> afterEnemyGoalCheck = readMapInJson("afterEnemyGoal");
+	map<string, bool> afterPassCheck = readMapInJson("afterPass");
+	map<string, bool> afterSaveCheck = readMapInJson("afterSave");
 	
 	map<string, map<string, bool>> maps = { {"default", defaultCheck}, {"beforeKickoff", beforeKickoffCheck}, { "afterAlliedGoal", afterAlliedGoalCheck }, {"afterEnemyGoal", afterEnemyGoalCheck}, {"afterPass", afterPassCheck}, {"afterSave", afterSaveCheck} };
 
 	if (enabled) {
 		ImGui::Text("\n");
 
-		/*if (ImGui::BeginTabBar("tabBar")) {
-			if (ImGui::BeginTabItem("1v1")) {*/
 		ImGui::PushID("1v1");
 
 		// AntiSpam button
-		if (ImGui::Checkbox("AntiSpam", &antiSpam)) {
-			antiSpamCvar.setValue(antiSpam);
+		if (ImGui::Checkbox("AntiSpam", &pluginParams.antispam)) {
+			editParamInJson("Default config", "antispam", pluginParams.antispam);
 		}
 		if (ImGui::IsItemHovered()) {
 			ImGui::SetTooltip("Enable/Disable AntiSpam");
 		}
 
 		// AntiSpam delay slider
-		if (antiSpam) {
-			if (ImGui::SliderInt("Delay", &delay, 0, 10)) {
-				delayCvar.setValue(delay);
+		if (pluginParams.antispam) {
+			if (ImGui::SliderInt("Delay", &pluginParams.antispam_delay, 0, 10)) {
+				editParamInJson("Default config", "antispam_delay", pluginParams.antispam_delay);
 			}
 			if (ImGui::IsItemHovered()) {
-				std::string hoverText = "Delay between two similar messages : " + std::to_string(delay) + " seconds";
+				std::string hoverText = "Delay between two similar messages : " + std::to_string(pluginParams.antispam_delay) + " seconds";
 				ImGui::SetTooltip(hoverText.c_str());
 			}
 			if (ImGui::Button("Reset delay value")) {
-				delay = 5;
-				delayCvar.setValue(delay);
+				pluginParams.antispam_delay = 5;
+				editParamInJson("Default config", "antispam_delay", pluginParams.antispam_delay);
 			}
 		}
 		else {
@@ -122,14 +86,14 @@ void BetterChat::RenderSettings() {
 
 		// Message Filter Button
 		ImGui::Text("\n");
-		if (ImGui::Checkbox("Message Filter", &chatFilter)) {
-			chatFilterCvar.setValue(chatFilter);
+		if (ImGui::Checkbox("Message Filter", &pluginParams.chatfilter)) {
+			editParamInJson("Default config", "chatfilter", pluginParams.chatfilter);
 		}
 		if (ImGui::IsItemHovered()) {
 			ImGui::SetTooltip("Enable/Disable Message Filter");
 		}
 
-		if (chatFilter) {
+		if (pluginParams.chatfilter) {
 			ImGui::Text("\n");
 			
 			ImGui::BeginChild("Quickchats", ImVec2(755, 450), true, ImGuiWindowFlags_MenuBar); ;
@@ -220,7 +184,7 @@ void BetterChat::RenderSettings() {
 						float btnOffsetX = (ImGui::GetColumnWidth() - 80) * 0.5f;
 						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + btnOffsetX - 6);
 						if (ImGui::Button(btn.c_str(), ImVec2(80, 18))) {
-							toggleQuickchatInJson(column, msg);
+							toggleQuickchatInJson("Default config", column, msg);
 							resetWhitelist();
 						}
 						ImGui::PopID();
@@ -231,7 +195,6 @@ void BetterChat::RenderSettings() {
 				}
 			}
 			ImGui::EndChild();
-			//ImGui::Separator();
 			ImGui::Columns(1, nullptr);
 
 			if (ImGui::Button("Reset table")) {
@@ -242,35 +205,35 @@ void BetterChat::RenderSettings() {
 
 			// Message filter options
 			ImGui::Text("\nMessage filter options:");
-			if (ImGui::Checkbox("Block written messages", &noWrittenMsg)) {
-				noWrittenMsgCvar.setValue(noWrittenMsg);
+			if (ImGui::Checkbox("Block written messages", &pluginParams.nowrittenmsg)) {
+				editParamInJson("Default config", "nowrittenmsg", pluginParams.nowrittenmsg);
 			}
-			if (ImGui::Checkbox("Count written messages in the toxicity scores", &writtenMsgAsToxic)) {
-				writtenMsgAsToxicCvar.setValue(writtenMsgAsToxic);
+			if (ImGui::Checkbox("Count written messages in the toxicity scores", &pluginParams.writtenmsgastoxic)) {
+				editParamInJson("Default config", "writtenmsgastoxic", pluginParams.writtenmsgastoxic);
 			}
 			if (ImGui::IsItemHovered()) {
 				ImGui::SetTooltip("If enabled, written messages will be considered as toxic if 'Block written messages' option is enabled, and as normal if not.");
 			}
-			if (ImGui::SliderInt("Time during which 'after a save' messages are allowed after a save.", &afterSaveTime, 0, 20)) {
-				afterSaveTimeCvar.setValue(afterSaveTime);
+			if (ImGui::SliderInt("Time during which 'after a save' messages are allowed after a save.", &pluginParams.aftersavetime, 0, 20)) {
+				editParamInJson("Default config", "aftersavetime", pluginParams.aftersavetime);
 			}
-			if (ImGui::Checkbox("Do not count a goal if it is an owngoal", &owngoalDetection)) {
-				owngoalCvar.setValue(owngoalDetection);
+			if (ImGui::Checkbox("Do not count a goal if it is an owngoal", &pluginParams.owngoal)) {
+				editParamInJson("Default config", "owngoal", pluginParams.owngoal);
 			}
-			if (ImGui::Checkbox("Do not count a pass if an opponent touch it", &unwantedPassDetection)) {
-				unwantedPassCvar.setValue(unwantedPassDetection);
+			if (ImGui::Checkbox("Do not count a pass if an opponent touch it", &pluginParams.unwanted_pass)) {
+				editParamInJson("Default config", "unwanted_pass", pluginParams.unwanted_pass);
 			}
 
 			// Toxicity Scores
 			ImGui::Text("\n");
-			if (ImGui::Checkbox("Toxicity scores", &toxicityScores)) {
-				toxicityScoresCvar.setValue(toxicityScores);
+			if (ImGui::Checkbox("Toxicity scores", &pluginParams.toxicityscores)) {
+				editParamInJson("Default config", "toxicityscores", pluginParams.toxicityscores);
 			}
 			if (ImGui::IsItemHovered()) {
 				ImGui::SetTooltip("Enable/Disable Toxicity Scores (at the end of the game)");
 			}
 
-			if (toxicityScores) {
+			if (pluginParams.toxicityscores) {
 				ImGui::Text("Toxicity scores options:");
 				if (ImGui::SliderInt("X", &toxicityScoreX, 0, 1920)) {
 					toxicityScoreXCvar.setValue(toxicityScoreX);
@@ -282,18 +245,5 @@ void BetterChat::RenderSettings() {
 			}
 		}
 		ImGui::PopID();
-				/*ImGui::EndTabItem();
-			}
-
-			if (ImGui::BeginTabItem("2v2")) {
-				ImGui::EndTabItem();
-			}
-
-			if (ImGui::BeginTabItem("3v3")) {
-				ImGui::EndTabItem();
-			}
-
-			ImGui::EndTabBar();
-		}*/
 	}
 }

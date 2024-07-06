@@ -8,6 +8,7 @@
 
 #include <set>
 #include <string>
+#include <variant>
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
 
 class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginSettingsWindow
@@ -72,38 +73,22 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		{"Group6Message4", "This is Rocket League!"}, // Ça c'est Rocket League !
 	};
 
-	//Functions
-
-	void resetWhitelist();
-
-	void jsonFileExists();
-	std::map<std::string, bool> readJson(std::string category);
-	void toggleQuickchatInJson(std::string category, std::string idMsg);
-
-	virtual void onLoad();
-	virtual void onUnload();
-
-	void handleMsg(bool cancel, std::string playerName);
-
-	void gameBegin();
-	void gameEnd();
-	void chatMessageEvent(ActorWrapper caller, void* args);
-	void onStatTickerMessage(ServerWrapper caller, void* args);
-	void hitBall(CarWrapper car, void* params);
-	void replayEnd();
-	void onTimerUpdate();
-	void onGoal();
-	void onOvertimeStarted();
-
-	void gameDestroyed();
-	void ShowToxicityScores(CanvasWrapper canvas);
+	// Structs
+	struct BetterChatParams {
+		bool antispam;
+		bool chatfilter;
+		int antispam_delay;
+		bool nowrittenmsg;
+		bool writtenmsgastoxic;
+		int aftersavetime;
+		bool owngoal;
+		bool unwanted_pass;
+		bool toxicityscores;
+	};
 
 	struct StatTickerParams {
-		// person who got a stat
 		uintptr_t Receiver;
-		// person who is victim of a stat (only exists for demos afaik)
 		uintptr_t Victim;
-		// wrapper for the stat event
 		uintptr_t StatEvent;
 	};
 
@@ -235,6 +220,36 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		uint8_t MessageType;
 		class FString TimeStamp;
 	};
+
+	//Functions
+
+	void resetWhitelist();
+
+	void jsonFileExists();
+	void createConfigInJson(std::string configName);
+	std::map<std::string, bool> readMapInJson(std::string category, std::string config = "Default config");
+	void toggleQuickchatInJson(std::string config, std::string category, std::string idMsg);
+	BetterChatParams getParamsInJson(std::string config);
+	void editParamInJson(std::string config, std::string param, std::variant<bool, int> value);
+
+
+	virtual void onLoad();
+	virtual void onUnload();
+
+	void handleMsg(bool cancel, std::string playerName);
+
+	void gameBegin();
+	void gameEnd();
+	void chatMessageEvent(ActorWrapper caller, void* args);
+	void onStatTickerMessage(ServerWrapper caller, void* args);
+	void hitBall(CarWrapper car, void* params);
+	void addKickoffMessages();
+	void onTimerUpdate();
+	void onGoal();
+	void onOvertimeStarted();
+
+	void gameDestroyed();
+	void ShowToxicityScores(CanvasWrapper canvas);
 
 	//Interface
 	void RenderSettings() override;
