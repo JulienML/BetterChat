@@ -1,10 +1,14 @@
 #include "pch.h"
 #include "BetterChat.h"
+#include <nlohmann/json.hpp>
 #include <set>
 #include <map>
 #include <string>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
+using json = nlohmann::json;
 
 //Plugin Settings Window code here
 
@@ -201,6 +205,24 @@ void BetterChat::RenderSettings() {
 				string path = gameWrapper->GetDataFolder().string() + "/BetterChat_config.json";
 				remove(path.c_str());
 				jsonFileExists();
+				ifstream inputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+				json jsonData;
+				inputFile >> jsonData;
+				inputFile.close();
+
+				jsonData["Default config"]["params"]["antispam"] = pluginParams.antispam;
+				jsonData["Default config"]["params"]["chatfilter"] = pluginParams.chatfilter;
+				jsonData["Default config"]["params"]["antispam_delay"] = pluginParams.antispam_delay;
+				jsonData["Default config"]["params"]["nowrittenmsg"] = pluginParams.nowrittenmsg;
+				jsonData["Default config"]["params"]["writtenmsgastoxic"] = pluginParams.writtenmsgastoxic;
+				jsonData["Default config"]["params"]["aftersavetime"] = pluginParams.aftersavetime;
+				jsonData["Default config"]["params"]["owngoal"] = pluginParams.owngoal;
+				jsonData["Default config"]["params"]["unwanted_pass"] = pluginParams.unwanted_pass;
+				jsonData["Default config"]["params"]["toxicityscores"] = pluginParams.toxicityscores;
+
+				ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+				outputFile << std::setw(4) << jsonData << endl;
+				outputFile.close();
 			}
 
 			// Message filter options

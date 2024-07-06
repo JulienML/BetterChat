@@ -50,16 +50,6 @@ void BetterChat::onLoad()
 	_globalCvarManager = cvarManager;
 
 	cvarManager->registerCvar("betterchat_enabled", "1", "Enable BetterChat Plugin", true, true, 0, true, 1);
-	// A PASSER DANS LE FICHIER TEXTE :
-	cvarManager->registerCvar("betterchat_antispam", "1", "Enable AntiSpam", true, true, 0, true, 1);
-	cvarManager->registerCvar("betterchat_chatfilter", "1", "Enable ChatFilter", true, true, 0, true, 1);
-	cvarManager->registerCvar("betterchat_delay", "5", "Delay between two same messages from the same player", true, true, 0, true, 10);
-	cvarManager->registerCvar("betterchat_nowrittenmsg", "0", "Disable written messages", true, true, 0, true, 1);
-	cvarManager->registerCvar("betterchat_writtenmsgastoxic", "0", "Consider written messages as toxic", true, true, 0, true, 1);
-	cvarManager->registerCvar("betterchat_aftersavetime", "5", "Time the 'After save' messages are allowed after a save", true, true, 0, true, 20);
-	cvarManager->registerCvar("betterchat_owngoal", "0", "Do not count the goal if it is an owngoal", true, true, 0, true, 1);
-	cvarManager->registerCvar("betterchat_unwanted_pass", "0", "Do not count the pass if an opponent touch it before the goal", true, true, 0, true, 1);
-	cvarManager->registerCvar("betterchat_toxicityscores", "1", "Enable Toxicity Scores", true, true, 0, true, 1);
 
 	cvarManager->registerCvar("betterchat_score_X", "1530", "", true, true, 0, true, 1920);
 	cvarManager->registerCvar("betterchat_score_Y", "45", "", true, true, 0, true, 1080);
@@ -150,6 +140,18 @@ void BetterChat::jsonFileExists() {
 		ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 		outputFile << std::setw(4) << jsonData << endl;
 		outputFile.close();
+	}
+	else {
+		ifstream file(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+		json jsonData;
+		file >> jsonData;
+		file.close();
+
+		if (!jsonData.contains("Default config")) { // It means that the json file is outdated
+			string path = gameWrapper->GetDataFolder().string() + "/BetterChat_config.json";
+			remove(path.c_str());
+			jsonFileExists();
+		}
 	}
 }
 
