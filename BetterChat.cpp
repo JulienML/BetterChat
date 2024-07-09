@@ -317,7 +317,7 @@ void BetterChat::onGoal() {
 
 	BetterChatParams pluginParams = getParamsInJson("Default config");
 
-	if (scorerTeam == lastTouchTeam || pluginParams.owngoal) {
+	if (scorerTeam == lastTouchTeam || !pluginParams.owngoal) {
 		if (scorerTeam == numTeam) { // Allied goal
 			LOG("[EVENT] Allied goal");
 			map<string, bool> afterAlliedGoalMsg = readMapInJson("afterAlliedGoal");
@@ -338,7 +338,7 @@ void BetterChat::onGoal() {
 		}
 	}
 
-	if ((lastTouchTeam == scorerTeam && secondLastTouchTeam == scorerTeam) || (lastTouchTeam != scorerTeam && thirdLastTouchTeam == scorerTeam) || pluginParams.unwanted_pass) {
+	if ((lastTouchTeam == scorerTeam && secondLastTouchTeam == scorerTeam) || (lastTouchTeam != scorerTeam && thirdLastTouchTeam == scorerTeam) || !pluginParams.unwanted_pass) {
 		if (assist) { // Assist
 			assist = false;
 			map<string, bool> afterPassMsg = readMapInJson("afterPass");
