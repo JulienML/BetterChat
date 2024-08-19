@@ -225,19 +225,25 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 
 	void resetWhitelist();
 
+	// -- JSON functions --
 	void jsonFileExists();
 	void createConfigInJson(std::string configName);
-	std::map<std::string, bool> readMapInJson(std::string category, std::string config = "Default config");
+	void deleteConfigInJson(std::string configName);
+	std::list<std::string> getConfigsListInJson();
+	std::map<std::string, std::string> getConfigByGamemodeInJson();
+	void editConfigByGamemodeInJson(std::string gamemode, std::string config);
+	std::map<std::string, bool> readMapInJson(std::string config, std::string category);
 	void toggleQuickchatInJson(std::string config, std::string category, std::string idMsg);
 	BetterChatParams getParamsInJson(std::string config);
 	void editParamInJson(std::string config, std::string param, std::variant<bool, int> value);
-
 
 	virtual void onLoad();
 	virtual void onUnload();
 
 	void handleMsg(bool cancel, std::string playerName);
-
+	
+	void setConfig();
+	void refreshConfig();
 	void gameBegin();
 	void gameEnd();
 	void chatMessageEvent(ActorWrapper caller, void* args);
@@ -251,7 +257,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	void gameDestroyed();
 	void ShowToxicityScores(CanvasWrapper canvas);
 
-	//Interface
+	// Interface
 	void RenderSettings() override;
 	std::string GetPluginName() override;
 	void SetImGuiContext(uintptr_t ctx) override;

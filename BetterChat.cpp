@@ -36,6 +36,7 @@ bool save;
 unsigned char numTeam;
 int blueScore;
 int orangeScore;
+bool gameInProgress;
 bool waitingForKickoff;
 bool goal;
 bool assist;
@@ -44,6 +45,9 @@ unsigned char secondLastTouchTeam;
 unsigned char thirdLastTouchTeam;
 
 int lastToucherID;
+
+string gamemode;
+string config;
 
 void BetterChat::onLoad()
 {
@@ -56,7 +60,14 @@ void BetterChat::onLoad()
 
 	jsonFileExists();
 
-	resetWhitelist();
+	if (gameWrapper->IsInOnlineGame()) {
+		setConfig();
+		resetWhitelist();
+		gameInProgress = true;
+	}
+	else {
+		gameInProgress = false;
+	}
 
 	gameWrapper->HookEventWithCaller<ActorWrapper>("Function GameEvent_TA.Countdown.BeginState", bind(&BetterChat::gameBegin, this));
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatTickerMessage", bind(&BetterChat::onStatTickerMessage, this, std::placeholders::_1, std::placeholders::_2));
@@ -85,13 +96,11 @@ void BetterChat::onUnload()
 	gameWrapper->UnhookEvent("Function TAGame.GameEvent_Soccar_TA.OnMatchWinnerSet");
 }
 
-/// <summary>
-/// Reset the whitelist										 
-/// </summary>
+// Reset the whitelist
 void BetterChat::resetWhitelist() {
 	LOG("Messages have been reset");
 	whitelist.clear();
-	map<string, bool> defaultMsg = readMapInJson("default");
+	map<string, bool> defaultMsg = readMapInJson(config, "default");
 	for (const auto& pair : defaultMsg) {
 		if (pair.second) {
 			whitelist.emplace_back(pair.first);
@@ -99,12 +108,11 @@ void BetterChat::resetWhitelist() {
 	}
 }
 
-/// <summary>
-/// Check if the json file exists. If not, it creates it
-/// </summary>
+// Check if the json file exists and updates it if necessary. If not, it creates it.
 void BetterChat::jsonFileExists() {
 	if (!filesystem::exists(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json")) {
 
+		// Default config
 		ofstream NewFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 		NewFile << setw(4) << "{\"Default config\":{\"afterAlliedGoal\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":true,\"Group2Message10\":false,\"Group2Message2\":false,\"Group2Message3\":true,\"Group2Message4\":false,\"Group2Message5\":true,\"Group2Message6\":true,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":true,\"Group3Message1\":true,\"Group3Message10\":true,\"Group3Message11\":false,\"Group3Message2\":false,\"Group3Message3\":true,\"Group3Message4\":false,\"Group3Message5\":true,\"Group3Message6\":true,\"Group3Message7\":false,\"Group3Message8\":true,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group6Message4\":true},\"afterEnemyGoal\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":true,\"Group2Message10\":false,\"Group2Message2\":false,\"Group2Message3\":true,\"Group2Message4\":false,\"Group2Message5\":true,\"Group2Message6\":true,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":true,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group6Message4\":false},\"afterPass\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":true,\"Group2Message10\":false,\"Group2Message2\":true,\"Group2Message3\":true,\"Group2Message4\":false,\"Group2Message5\":true,\"Group2Message6\":true,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":true,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group6Message4\":false},\"afterSave\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":false,\"Group2Message10\":false,\"Group2Message2\":false,\"Group2Message3\":true,\"Group2Message4\":true,\"Group2Message5\":false,\"Group2Message6\":false,\"Group2Message7\":true,\"Group2Message8\":true,\"Group2Message9\":false,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group6Message4\":false},\"beforeKickoff\":{\"Group1Message1\":true,\"Group1Message10\":true,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":false,\"Group2Message10\":false,\"Group2Message2\":false,\"Group2Message3\":false,\"Group2Message4\":false,\"Group2Message5\":false,\"Group2Message6\":false,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":false,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group6Message4\":false},\"default\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":false,\"Group2Message10\":false,\"Group2Message2\":false,\"Group2Message3\":false,\"Group2Message4\":false,\"Group2Message5\":false,\"Group2Message6\":false,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":false,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group6Message4\":false}}}" << endl;
 		NewFile.close();
@@ -127,6 +135,7 @@ void BetterChat::jsonFileExists() {
 			}
 		}
 
+		// Parameters
 		jsonData["Default config"]["params"]["antispam"] = true;
 		jsonData["Default config"]["params"]["chatfilter"] = true;
 		jsonData["Default config"]["params"]["antispam_delay"] = 5;
@@ -136,6 +145,13 @@ void BetterChat::jsonFileExists() {
 		jsonData["Default config"]["params"]["owngoal"] = false;
 		jsonData["Default config"]["params"]["unwanted_pass"] = false;
 		jsonData["Default config"]["params"]["toxicityscores"] = true;
+
+		// Config by gamemode
+		jsonData["ConfigByGamemode"]["1v1"] = "Default config";
+		jsonData["ConfigByGamemode"]["2v2"] = "Default config";
+		jsonData["ConfigByGamemode"]["3v3"] = "Default config";
+		jsonData["ConfigByGamemode"]["Tournament"] = "Default config";
+		jsonData["ConfigByGamemode"]["Extra"] = "Default config";
 
 		ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 		outputFile << std::setw(4) << jsonData << endl;
@@ -147,11 +163,27 @@ void BetterChat::jsonFileExists() {
 		file >> jsonData;
 		file.close();
 
-		if (!jsonData.contains("Default config")) { // It means that the json file is outdated
+		if (!jsonData.contains("Default config")) { // If the file version is older than BetterChat v2.2.1
 			string path = gameWrapper->GetDataFolder().string() + "/BetterChat_config.json";
 			remove(path.c_str());
 			jsonFileExists();
 		}
+
+		if (!jsonData.contains("ConfigByGamemode")) { // If the file version is older than BetterChat v3.0.0
+			jsonData["ConfigByGamemode"]["1v1"] = "Default config";
+			jsonData["ConfigByGamemode"]["2v2"] = "Default config";
+			jsonData["ConfigByGamemode"]["3v3"] = "Default config";
+			jsonData["ConfigByGamemode"]["Tournament"] = "Default config";
+			jsonData["ConfigByGamemode"]["Extra"] = "Default config";
+
+			ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+			outputFile << std::setw(4) << jsonData << endl;
+			outputFile.close();
+		}
+	}
+	if (filesystem::exists(gameWrapper->GetDataFolder().string() + "/BetterChat_Blacklist.json")) { // Deletes the file used before BetterChat v2.0.0
+		string path = gameWrapper->GetDataFolder().string() + "/BetterChat_Blacklist.json";
+		remove(path.c_str());
 	}
 }
 
@@ -169,8 +201,63 @@ void BetterChat::createConfigInJson(string configName) {
 	outputFile.close();
 }
 
+// Delete a config in the json file
+void BetterChat::deleteConfigInJson(string configName) {
+	ifstream file(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	json jsonData;
+	file >> jsonData;
+	file.close();
+
+	jsonData.erase(configName);
+
+	ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	outputFile << std::setw(4) << jsonData << endl;
+	outputFile.close();
+}
+
+// Get the list of configs in the json file
+list<string> BetterChat::getConfigsListInJson() {
+	ifstream file(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	json jsonData;
+	file >> jsonData;
+	file.close();
+
+	list<string> configs = { "Default config" };
+	
+	for (json::iterator it = jsonData.begin(); it != jsonData.end(); ++it) {
+		if (it.key() != "ConfigByGamemode" && it.key() != "Default config") {
+			configs.emplace_back(it.key());
+		}
+	}
+
+	return configs;
+}
+
+map<string, string> BetterChat::getConfigByGamemodeInJson() {
+	ifstream file(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	json jsonData;
+	file >> jsonData;
+
+	map<string, string> configByGamemode = jsonData["ConfigByGamemode"];
+	return configByGamemode;
+}
+
+// Change the plugin config for a specific gamemode
+void BetterChat::editConfigByGamemodeInJson(string gamemode, string config) {
+	ifstream file(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	json jsonData;
+	file >> jsonData;
+	file.close();
+
+	jsonData["ConfigByGamemode"][gamemode] = config;
+
+	ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	outputFile << std::setw(4) << jsonData << endl;
+	outputFile.close();
+}
+
 // Return the message/boolean map of the specified category
-map<string, bool> BetterChat::readMapInJson(string category, string config) {
+map<string, bool> BetterChat::readMapInJson(string config, string category) {
 	ifstream file(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 	json jsonData;
 	file >> jsonData;
@@ -191,7 +278,7 @@ void BetterChat::toggleQuickchatInJson(string config, string category, string id
 	ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 	outputFile << std::setw(4) << jsonData << endl;
 	outputFile.close();
-	LOG("\"" + BetterChat::idQuickchats[idMsg] + "\" is now " + (jsonData[config][category][idMsg] ? "allowed" : "forbidden") + " in '" + category + "' category.");
+	LOG("\"" + BetterChat::idQuickchats[idMsg] + "\" is now " + (jsonData[config][category][idMsg] ? "allowed" : "forbidden") + " in '" + category + "' category of the '" + config + "' configuration.");
 }
 
 // Get a parameter in the json file
@@ -234,31 +321,77 @@ void BetterChat::editParamInJson(string config, string param, std::variant<bool,
 	outputFile.close();
 }
 
+void BetterChat::refreshConfig() {
+	config = getConfigByGamemodeInJson()[gamemode];
+	LOG("Config changed: " + config);
+}
+
+// Check the gamemode and apply the corresponding plugin configuration
+void BetterChat::setConfig() {
+	if (!gameWrapper->IsInOnlineGame()) { return; }
+
+	ServerWrapper server = gameWrapper->GetCurrentGameState();
+	GameSettingPlaylistWrapper playlistWrapper = server.GetPlaylist();
+	UnrealStringWrapper playlistTitle = playlistWrapper.GetTitle();
+
+	if (!playlistTitle) {
+		LOG("Gamemode not recognized, set to 'Extra' by default");
+		gamemode = "Extra";
+	}
+	else {
+		string playlist = playlistTitle.ToString();
+		if (playlist == "Duel" || playlist == "Duel solo") {
+			gamemode = "1v1";
+		}
+		else if (playlist == "Double") {
+			gamemode = "2v2";
+		}
+		else if (playlist == "Standard") {
+			gamemode = "3v3";
+		}
+		else if (playlist == "Tournament") {
+			gamemode = "Tournament";
+		}
+		else {
+			gamemode = "Extra";
+		}
+	}
+
+	config = getConfigByGamemodeInJson()[gamemode];
+
+	LOG("Gamemode: " + gamemode);
+	LOG("Config: " + config);
+}
+
 // Game begin
 void BetterChat::gameBegin() {
 	if (!gameWrapper->IsInOnlineGame()) { return; }
 	gameWrapper->UnregisterDrawables();
 
-	ServerWrapper server = gameWrapper->GetCurrentGameState();
-	int maxScore = server.GetTotalScore();
-	if (maxScore > 0) { return; }
-	resetWhitelist();
-	playersInfos.clear();
-	LOG("[EVENT] Game start");
+	if (gameInProgress) { return; }
+	else {
+		gameInProgress = true;
 
-	numTeam = gameWrapper->GetLocalCar().GetPRI().GetTeamNum();
-	blueScore = 0;
-	orangeScore = 0;
-	waitingForKickoff = true;
-	addKickoffMessages();
-	goal = false;
-	assist = false;
-	lastTouchTeam = -1;
-	secondLastTouchTeam = -1;
-	thirdLastTouchTeam = -1;
-	lastToucherID = -1;
-	lastSaveTime = chrono::system_clock::now();
-	save = false;
+		setConfig();
+
+		resetWhitelist();
+		playersInfos.clear();
+		LOG("[EVENT] Game start");
+
+		numTeam = gameWrapper->GetLocalCar().GetPRI().GetTeamNum();
+		blueScore = 0;
+		orangeScore = 0;
+		waitingForKickoff = true;
+		addKickoffMessages();
+		goal = false;
+		assist = false;
+		lastTouchTeam = -1;
+		secondLastTouchTeam = -1;
+		thirdLastTouchTeam = -1;
+		lastToucherID = -1;
+		lastSaveTime = chrono::system_clock::now();
+		save = false;
+	}
 }
 
 // Event
@@ -266,12 +399,9 @@ void BetterChat::onStatTickerMessage(ServerWrapper caller, void* params) {
 	StatTickerParams* pstats = (StatTickerParams*)params;
 	StatEventWrapper event = StatEventWrapper(pstats->StatEvent);
 
-	CarWrapper me = gameWrapper->GetLocalCar();
-	PriWrapper receiver = PriWrapper(pstats->Receiver);
-	PriWrapper victim = PriWrapper(pstats->Victim);
 	std::string name = event.GetEventName();
 
-	if (!gameWrapper->IsInOnlineGame()) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
 
 	ServerWrapper server = gameWrapper->GetCurrentGameState();
 
@@ -282,7 +412,7 @@ void BetterChat::onStatTickerMessage(ServerWrapper caller, void* params) {
 	else if (name == "Save" || name == "EpicSave") { // Save
 		whitelist.clear();
 		LOG("[EVENT] Save");
-		map<string, bool> afterSaveMsg = readMapInJson("afterSave");
+		map<string, bool> afterSaveMsg = readMapInJson(config, "afterSave");
 		for (const auto& pair : afterSaveMsg) {
 			if (pair.second) {
 				whitelist.emplace_back(pair.first);
@@ -299,7 +429,7 @@ void BetterChat::onStatTickerMessage(ServerWrapper caller, void* params) {
 
 // Goal
 void BetterChat::onGoal() {
-	if (!gameWrapper->IsInOnlineGame() || !goal) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !goal || !gameInProgress) { return; }
 	whitelist.clear();
 	goal = false;
 
@@ -315,12 +445,12 @@ void BetterChat::onGoal() {
 		scorerTeam = 1;
 	}
 
-	BetterChatParams pluginParams = getParamsInJson("Default config");
+	BetterChatParams pluginParams = getParamsInJson(config);
 
 	if (scorerTeam == lastTouchTeam || !pluginParams.owngoal) {
 		if (scorerTeam == numTeam) { // Allied goal
 			LOG("[EVENT] Allied goal");
-			map<string, bool> afterAlliedGoalMsg = readMapInJson("afterAlliedGoal");
+			map<string, bool> afterAlliedGoalMsg = readMapInJson(config, "afterAlliedGoal");
 			for (const auto& pair : afterAlliedGoalMsg) {
 				if (pair.second) {
 					whitelist.emplace_back(pair.first);
@@ -329,7 +459,7 @@ void BetterChat::onGoal() {
 		}
 		else { // Enemy goal
 			LOG("[EVENT] Enemy goal");
-			map<string, bool> afterEnemyGoalMsg = readMapInJson("afterEnemyGoal");
+			map<string, bool> afterEnemyGoalMsg = readMapInJson(config, "afterEnemyGoal");
 			for (const auto& pair : afterEnemyGoalMsg) {
 				if (pair.second) {
 					whitelist.emplace_back(pair.first);
@@ -341,7 +471,7 @@ void BetterChat::onGoal() {
 	if ((lastTouchTeam == scorerTeam && secondLastTouchTeam == scorerTeam) || (lastTouchTeam != scorerTeam && thirdLastTouchTeam == scorerTeam) || !pluginParams.unwanted_pass) {
 		if (assist) { // Assist
 			assist = false;
-			map<string, bool> afterPassMsg = readMapInJson("afterPass");
+			map<string, bool> afterPassMsg = readMapInJson(config, "afterPass");
 			for (const auto& pair : afterPassMsg) {
 				if (pair.second) {
 					whitelist.emplace_back(pair.first);
@@ -353,6 +483,8 @@ void BetterChat::onGoal() {
 
 // Kick-off
 void BetterChat::hitBall(CarWrapper car, void* params) {
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
+
 	if (waitingForKickoff == true) {
 		waitingForKickoff = false;
 		LOG("[EVENT] Kick-off");
@@ -374,14 +506,15 @@ void BetterChat::hitBall(CarWrapper car, void* params) {
 		lastToucherID = car.GetPRI().GetPlayerID();
 	}
 
-	if (save && chrono::system_clock::now() > lastSaveTime + chrono::seconds(getParamsInJson("Default config").aftersavetime)) {
+	if (save && chrono::system_clock::now() > lastSaveTime + chrono::seconds(getParamsInJson(config).aftersavetime)) {
 		save = false;
 		resetWhitelist();
 	}
 }
 
 void BetterChat::onTimerUpdate() {
-	if (save && chrono::system_clock::now() > lastSaveTime + chrono::seconds(getParamsInJson("Default config").aftersavetime)) {
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
+	if (save && chrono::system_clock::now() > lastSaveTime + chrono::seconds(getParamsInJson(config).aftersavetime)) {
 		save = false;
 		resetWhitelist();
 	}
@@ -389,7 +522,7 @@ void BetterChat::onTimerUpdate() {
 
 // Overtime
 void BetterChat::onOvertimeStarted() {
-	if (!gameWrapper->IsInOnlineGame()) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
 	LOG("[EVENT] Overtime");
 	whitelist.clear();
 	addKickoffMessages();
@@ -397,9 +530,9 @@ void BetterChat::onOvertimeStarted() {
 
 // Replay end
 void BetterChat::addKickoffMessages() {
-	if (!gameWrapper->IsInOnlineGame()) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
 	waitingForKickoff = true;
-	map<string, bool> beforeKickoffMsg = readMapInJson("beforeKickoff");
+	map<string, bool> beforeKickoffMsg = readMapInJson(config, "beforeKickoff");
 	for (const auto& pair : beforeKickoffMsg) {
 		if (std::find(whitelist.begin(), whitelist.end(), pair.first) == whitelist.end()) {
 			if (pair.second) whitelist.emplace_back(pair.first);
@@ -414,13 +547,14 @@ void BetterChat::addKickoffMessages() {
 // Game end
 void BetterChat::gameEnd() {
 	resetWhitelist();
+	gameInProgress = false;
 	LOG("[EVENT] Game end");
 	gameWrapper->RegisterDrawable(bind(&BetterChat::ShowToxicityScores, this, std::placeholders::_1));
 }
 
 // Display the table with the number of blocked messages per player during the game
 void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
-	if (getParamsInJson("Default config").toxicityscores && cvarManager->getCvar("betterchat_enabled").getBoolValue()) {
+	if (getParamsInJson(config).chatfilter && getParamsInJson(config).toxicityscores && cvarManager->getCvar("betterchat_enabled").getBoolValue()) {
 		canvas.SetColor(LinearColor(255, 255, 255, 255));
 
 		int x = cvarManager->getCvar("betterchat_score_X").getIntValue();
@@ -430,7 +564,7 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 		canvas.DrawString("Player names", 1, 1);
 
 		canvas.SetPosition(Vector2({ x + 150, y }));
-		canvas.DrawString("Messages blocked", 1, 1);
+		canvas.DrawString("Blocked messages", 1, 1);
 
 		canvas.SetPosition(Vector2({ x + 300, y }));
 		canvas.DrawString("Ratio", 1, 1);
@@ -483,6 +617,7 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 
 // Erase the table
 void BetterChat::gameDestroyed() {
+	gameInProgress = false;
 	gameWrapper->UnregisterDrawables();
 }
 
@@ -520,7 +655,7 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 			return;
 		}
 
-		BetterChatParams pluginParams = getParamsInJson("Default config");
+		BetterChatParams pluginParams = getParamsInJson(config);
 
 		if (pluginParams.antispam) {
 			delay = std::chrono::seconds(pluginParams.antispam_delay);

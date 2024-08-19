@@ -12,7 +12,6 @@ In this way, you can make the usual toxic Rocket League chat more respectful and
 * [Configuration](#configuration)
     * [Anti-Spam](#anti-spam)
     * [Chat Filter](#chat-filter)
-* [Credits](#credits)
 
 # Installation
 
@@ -26,7 +25,11 @@ You are ready to use the plugin :)
 
 You can configure the plugin easily by pressing F2 -> Plugins -> BetterChat Plugin.
 
-Here, you can configure the two features: the anti-spam and the message filter.
+Here, you can create as many configurations as you want and assign them to the different gamemodes:
+
+![Menu1](https://github.com/user-attachments/assets/184db644-d443-443c-9ee7-929d249f9867)
+
+Each configuration is composed of two features: an Anti-Spam and a Message Filter.
 
 ## Anti-Spam
 
@@ -49,9 +52,3 @@ In the Message Filter section, you can allow/disallow the quickchat you want at 
 At the bottom, you can configure the position of the toxicity scores at the end of the game:
 
 ![Menu5](https://github.com/JulienML/BetterChat/assets/108280870/4fdb965d-8cb5-4e34-a509-7903a4f9eba5)
-
-# Credits
-
-I was able to create this plugin thanks to these ones, from which I took inspiration several times:
-- [Quickchat Detoxify](https://bakkesplugins.com/plugins/view/361) from **oofsamy**
-- [QuickVoice](https://bakkesplugins.com/plugins/view/303) from **Sei4or**
