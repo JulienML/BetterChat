@@ -1,5 +1,6 @@
 .vs/
 .vscode/
 build/
+vcpkg_installed/
 README BakkesPlugins.md
 crash.txt
