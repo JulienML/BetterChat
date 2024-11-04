@@ -639,7 +639,7 @@ void BetterChat::handleMsg(bool cancel, std::string playerName) {
 
 // Determine if a quickchat message should be erased or not
 void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
-	if (params) {
+	if (gameWrapper->IsInOnlineGame() && params) {
 
 		FHUDChatMessage* chatMessageParams = static_cast<FHUDChatMessage*>(params);
 		if (chatMessageParams->PlayerName == nullptr) return;
@@ -665,7 +665,7 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 		}
 
 		bool cancel = false;
-
+		LOG(msgID);
 		regex quickchat_pattern("^Group\\dMessage\\d\\d?$");
 		if (regex_match(msgID, quickchat_pattern)) // If it is a quickchat
 		{
