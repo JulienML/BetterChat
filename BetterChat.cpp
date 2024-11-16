@@ -639,7 +639,7 @@ void BetterChat::handleMsg(bool cancel, std::string playerName) {
 
 // Determine if a quickchat message should be erased or not
 void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
-	if (gameWrapper->IsInOnlineGame() && params) {
+	if (gameInProgress && params) {
 
 		FHUDChatMessage* chatMessageParams = static_cast<FHUDChatMessage*>(params);
 		if (chatMessageParams->PlayerName == nullptr) return;
