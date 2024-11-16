@@ -60,7 +60,7 @@ void BetterChat::onLoad()
 
 	jsonFileExists();
 
-	if (gameWrapper->IsInOnlineGame()) {
+	if (gameWrapper->IsInOnlineGame() && !gameWrapper->IsInReplay()) {
 		setConfig();
 		resetWhitelist();
 		gameInProgress = true;
@@ -365,7 +365,7 @@ void BetterChat::setConfig() {
 
 // Game begin
 void BetterChat::gameBegin() {
-	if (!gameWrapper->IsInOnlineGame()) { return; }
+	if (!gameWrapper->IsInOnlineGame() || gameWrapper->IsInReplay()) { return; }
 	gameWrapper->UnregisterDrawables();
 
 	if (gameInProgress) { return; }
@@ -665,7 +665,7 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 		}
 
 		bool cancel = false;
-		LOG(msgID);
+
 		regex quickchat_pattern("^Group\\dMessage\\d\\d?$");
 		if (regex_match(msgID, quickchat_pattern)) // If it is a quickchat
 		{
