@@ -367,7 +367,8 @@ void BetterChat::setConfig() {
 void BetterChat::gameBegin() {
 	if (!gameWrapper->IsInOnlineGame() || gameWrapper->IsInReplay()) { return; }
 	gameWrapper->UnregisterDrawables();
-
+	CarWrapper localCar = gameWrapper->GetLocalCar();
+	if (!localCar) { return; }
 	if (gameInProgress) { return; }
 	else {
 		gameInProgress = true;
@@ -546,10 +547,12 @@ void BetterChat::addKickoffMessages() {
 
 // Game end
 void BetterChat::gameEnd() {
-	resetWhitelist();
-	gameInProgress = false;
-	LOG("[EVENT] Game end");
-	gameWrapper->RegisterDrawable(bind(&BetterChat::ShowToxicityScores, this, std::placeholders::_1));
+	if (gameInProgress) {
+		resetWhitelist();
+		gameInProgress = false;
+		LOG("[EVENT] Game end");
+		gameWrapper->RegisterDrawable(bind(&BetterChat::ShowToxicityScores, this, std::placeholders::_1));
+	}
 }
 
 // Display the table with the number of blocked messages per player during the game
