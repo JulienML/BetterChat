@@ -29,6 +29,9 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		{"Group1Message12", "On your left!"}, // Sur ta gauche !
 		{"Group1Message13", "On your right!"}, // Sur ta droite !
 		{"Group1Message14", "Passing!"}, // La passe !
+		{"Group1Message15", "Rotating Up!"}, // Je monte !
+		{"Group1Message16", "Rotating back!"}, // Je recule !
+		{"Group1Message17", "You have time!"}, // Tu as le temps !
 
 		{"Group2Message1", "Nice shot!"}, // Beau tir !
 		{"Group2Message2", "Great pass!"}, // Belle passe !
@@ -40,6 +43,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		{"Group2Message8", "Nice block!"}, // Super blocage !
 		{"Group2Message9", "Nice bump!"}, // Bel impact !
 		{"Group2Message10", "Nice demo!"}, // Jolie démo !
+		{"Group2Message11", "We got this."}, // On assure !
 
 		{"Group3Message1", "OMG!"}, // Oh mon dieu !
 		{"Group3Message2", "Noooo!"}, // Noooon !
@@ -52,6 +56,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		{"Group3Message9", "Calculated."}, // C'est prévu.
 		{"Group3Message10", "Savage!"}, // Sauvage !
 		{"Group3Message11", "Okay."}, // Ok.
+		{"Group3Message12", "Yes!"}, // Oui !
 
 		{"Group4Message1", "$#@%!"}, // $#@%!
 		{"Group4Message2", "No problem."}, // Pas de problèmes.
@@ -69,6 +74,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		{"Group5Message6", "What a game!"}, // Quelle partie !
 		{"Group5Message7", "Nice moves!"}, // Super déplacements !
 		{"Group5Message8", "Everybody dance!"}, // Que tout le monde dance !
+		{"Group5Message9", "Party Up?"}, // On groupe ?
 
 		{"Group6Message4", "This is Rocket League!"}, // Ça c'est Rocket League !
 	};
