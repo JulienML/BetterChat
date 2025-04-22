@@ -76,7 +76,7 @@ void BetterChat::onLoad()
 	gameWrapper->HookEventWithCallerPost<CarWrapper>("Function TAGame.Car_TA.EventHitBall", bind(&BetterChat::hitBall, this, std::placeholders::_1, std::placeholders::_2));
 	gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.OnGameTimeUpdated", bind(&BetterChat::onTimerUpdate, this));
 	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.Ball_TA.OnHitGoal", bind(&BetterChat::onGoal, this));
-	gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.OnOvertimeUpdated", std::bind(&BetterChat::onOvertimeStarted, this));
+	gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.OnOvertimeUpdated", bind(&BetterChat::onOvertimeStarted, this));
 	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.GameEvent_TA.Destroyed", bind(&BetterChat::gameDestroyed, this));
 	gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.OnMatchWinnerSet", bind(&BetterChat::gameEnd, this));
 	LOG("Plugin On");
@@ -92,21 +92,12 @@ void BetterChat::onUnload()
 	gameWrapper->UnhookEvent("Function TAGame.Car_TA.EventHitBall");
 	gameWrapper->UnhookEvent("Function TAGame.GameEvent_Soccar_TA.OnGameTimeUpdated");
 	gameWrapper->UnhookEvent("Function TAGame.Ball_TA.OnHitGoal");
+	gameWrapper->UnhookEvent("Function TAGame.GameEvent_Soccar_TA.OnOvertimeUpdated");
 	gameWrapper->UnhookEvent("Function TAGame.GameEvent_TA.Destroyed");
 	gameWrapper->UnhookEvent("Function TAGame.GameEvent_Soccar_TA.OnMatchWinnerSet");
 }
 
-// Reset the whitelist
-void BetterChat::resetWhitelist() {
-	LOG("Messages have been reset");
-	whitelist.clear();
-	map<string, bool> defaultMsg = readMapInJson(config, "default");
-	for (const auto& pair : defaultMsg) {
-		if (pair.second) {
-			whitelist.emplace_back(pair.first);
-		}
-	}
-}
+#pragma region JSON_Functions
 
 // Check if the json file exists and updates it if necessary. If not, it creates it.
 void BetterChat::jsonFileExists() {
@@ -348,6 +339,23 @@ void BetterChat::editParamInJson(string config, string param, std::variant<bool,
 	outputFile.close();
 }
 
+#pragma endregion JSON_Functions
+
+#pragma region Game_Functions
+
+// Reset the whitelist
+void BetterChat::resetWhitelist() {
+	LOG("Messages have been reset");
+	whitelist.clear();
+	map<string, bool> defaultMsg = readMapInJson(config, "default");
+	for (const auto& pair : defaultMsg) {
+		if (pair.second) {
+			whitelist.emplace_back(pair.first);
+		}
+	}
+}
+
+// Refresh the current gamemode config
 void BetterChat::refreshConfig() {
 	config = getConfigByGamemodeInJson()[gamemode];
 	LOG("Config changed: " + config);
@@ -533,13 +541,9 @@ void BetterChat::hitBall(CarWrapper car, void* params) {
 
 		lastToucherID = car.GetPRI().GetPlayerID();
 	}
-
-	if (save && chrono::system_clock::now() > lastSaveTime + chrono::seconds(getParamsInJson(config).aftersavetime)) {
-		save = false;
-		resetWhitelist();
-	}
 }
 
+// Timer update
 void BetterChat::onTimerUpdate() {
 	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
 	if (save && chrono::system_clock::now() > lastSaveTime + chrono::seconds(getParamsInJson(config).aftersavetime)) {
@@ -576,7 +580,6 @@ void BetterChat::addKickoffMessages() {
 void BetterChat::gameEnd() {
 	if (gameInProgress) {
 		resetWhitelist();
-		gameInProgress = false;
 		LOG("[EVENT] Game end");
 		gameWrapper->RegisterDrawable(bind(&BetterChat::ShowToxicityScores, this, std::placeholders::_1));
 	}
@@ -645,10 +648,11 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 	}
 }
 
-// Erase the table
+// Game destroyed
 void BetterChat::gameDestroyed() {
+	LOG("[EVENT] Game destroyed");
 	gameInProgress = false;
-	gameWrapper->UnregisterDrawables();
+	gameWrapper->UnregisterDrawables(); // Erase the table
 }
 
 // Erase a message if necessary
@@ -739,3 +743,5 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 		gameWrapper->UnhookEvent("Function TAGame.GFxData_Chat_TA.OnChatMessage");
 	});
 }
+
+#pragma endregion Game_Functions
