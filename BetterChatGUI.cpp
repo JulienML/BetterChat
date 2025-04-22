@@ -50,10 +50,10 @@ void BetterChat::RenderSettings() {
 		ImGui::SetTooltip("Enable/Disable BetterChat Plugin");
 	}
 
-	ImGui::Separator();
-
 	if (enabled)
 	{
+		ImGui::Separator();
+
 		// Configuration by gamemode
 		ImGui::Text("Gamemode configuration:");
 		ImGui::Text("");
@@ -372,6 +372,12 @@ void BetterChat::RenderSettings() {
 			toxicityScoreYCvar.setValue(toxicityScoreY);
 		}
 	}
+
+	ImGui::Text("\n\n");
+
+	ImGui::Separator();
+
+	ImGui::Text("Plugin version: %s", plugin_version);
 
 	if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Text("This config name is invalid\nor already exists.");
