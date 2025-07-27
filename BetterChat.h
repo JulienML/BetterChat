@@ -248,6 +248,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 
 	void handleMsg(bool cancel, std::string playerName);
 	
+	void onNewGame();
 	void setConfig();
 	void refreshConfig();
 	void gameBegin();

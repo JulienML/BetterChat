@@ -37,6 +37,7 @@ unsigned char numTeam;
 int blueScore;
 int orangeScore;
 bool gameInProgress;
+bool endGameScreen;
 bool waitingForKickoff;
 bool goal;
 bool assist;
@@ -68,8 +69,17 @@ void BetterChat::onLoad()
 	else {
 		gameInProgress = false;
 	}
-
-	gameWrapper->HookEventWithCaller<ActorWrapper>("Function GameEvent_TA.Countdown.BeginState", bind(&BetterChat::gameBegin, this));
+	endGameScreen = false;
+	
+	gameWrapper->HookEvent("Function ProjectX.EngineShare_X.EventPreLoadMap", bind([this]() {
+		if (gameWrapper->IsInReplay() || gameWrapper->IsInFreeplay()) { return; }
+		gameWrapper->HookEvent("Function GameEvent_Soccar_TA.Active.StartRound", bind([this]() {
+			gameWrapper->SetTimeout([&](...) { gameBegin(); }, 2.0f);
+		}));
+	}));
+	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.WaitingForPlayers.BeginState", bind([this]() {
+		gameWrapper->SetTimeout([&](...) { onNewGame(); }, 0.5f);
+	}));
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>("Function TAGame.GFxHUD_TA.HandleStatTickerMessage", bind(&BetterChat::onStatTickerMessage, this, std::placeholders::_1, std::placeholders::_2));
 	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.HUDBase_TA.OnChatMessage", bind(&BetterChat::chatMessageEvent, this, std::placeholders::_1, std::placeholders::_2));
 	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.Replay_TA.StopPlayback", bind(&BetterChat::addKickoffMessages, this));
@@ -83,9 +93,12 @@ void BetterChat::onLoad()
 }
 
 void BetterChat::onUnload()
-{
+{ 
 	LOG("Plugin Off");
+	gameWrapper->UnhookEvent("Function ProjectX.EngineShare_X.EventPreLoadMap");
 	gameWrapper->UnhookEvent("Function GameEvent_TA.Countdown.BeginState");
+	gameWrapper->UnhookEvent("Function GameEvent_Soccar_TA.Active.StartRound");
+	gameWrapper->UnhookEvent("Function GameEvent_Soccar_TA.WaitingForPlayers.BeginState");
 	gameWrapper->UnhookEvent("Function TAGame.GFxHUD_TA.HandleStatTickerMessage");
 	gameWrapper->UnhookEvent("Function TAGame.HUDBase_TA.OnChatMessage");
 	gameWrapper->UnhookEvent("Function TAGame.Replay_TA.StopPlayback");
@@ -398,20 +411,32 @@ void BetterChat::setConfig() {
 	LOG("Config: " + config);
 }
 
-// Game begin
-void BetterChat::gameBegin() {
-	if (!gameWrapper->IsInOnlineGame() || gameWrapper->IsInReplay()) { return; }
+void BetterChat::onNewGame() {
+	if (!gameWrapper->IsInOnlineGame() || gameWrapper->IsInReplay()) { LOG("Not in Online Game"); return; }
 	gameWrapper->UnregisterDrawables();
-	CarWrapper localCar = gameWrapper->GetLocalCar();
-	if (!localCar) { return; }
 	if (gameInProgress) { return; }
 	else {
+		LOG("[EVENT] New game");
+
 		gameInProgress = true;
+		endGameScreen = false;
 
 		setConfig();
 
 		resetWhitelist();
 		playersInfos.clear();
+
+		gameWrapper->HookEvent("Function GameEvent_TA.Countdown.BeginState", bind(&BetterChat::gameBegin, this));
+	}
+}
+
+// Game begin
+void BetterChat::gameBegin() {
+	if (!gameWrapper->IsInOnlineGame() || gameWrapper->IsInReplay()) { return; }
+	if (!gameInProgress) { onNewGame(); gameWrapper->UnhookEvent("Function GameEvent_Soccar_TA.Active.StartRound"); }
+	CarWrapper localCar = gameWrapper->GetLocalCar();
+	if (!localCar) { return; }
+	else {
 		LOG("[EVENT] Game start");
 
 		numTeam = gameWrapper->GetLocalCar().GetPRI().GetTeamNum();
@@ -427,6 +452,8 @@ void BetterChat::gameBegin() {
 		lastToucherID = -1;
 		lastSaveTime = chrono::system_clock::now();
 		save = false;
+
+		gameWrapper->UnhookEvent("Function GameEvent_TA.Countdown.BeginState");
 	}
 }
 
@@ -437,7 +464,7 @@ void BetterChat::onStatTickerMessage(ServerWrapper caller, void* params) {
 
 	std::string name = event.GetEventName();
 
-	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress || endGameScreen) { return; }
 
 	ServerWrapper server = gameWrapper->GetCurrentGameState();
 
@@ -465,7 +492,7 @@ void BetterChat::onStatTickerMessage(ServerWrapper caller, void* params) {
 
 // Goal
 void BetterChat::onGoal() {
-	if (!gameWrapper->IsInOnlineGame() || !goal || !gameInProgress) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !goal || !gameInProgress || endGameScreen) { return; }
 	whitelist.clear();
 	goal = false;
 
@@ -519,7 +546,7 @@ void BetterChat::onGoal() {
 
 // Kick-off
 void BetterChat::hitBall(CarWrapper car, void* params) {
-	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress || endGameScreen) { return; }
 
 	if (waitingForKickoff == true) {
 		waitingForKickoff = false;
@@ -545,7 +572,7 @@ void BetterChat::hitBall(CarWrapper car, void* params) {
 
 // Timer update
 void BetterChat::onTimerUpdate() {
-	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress || endGameScreen) { return; }
 	if (save && chrono::system_clock::now() > lastSaveTime + chrono::seconds(getParamsInJson(config).aftersavetime)) {
 		save = false;
 		resetWhitelist();
@@ -554,7 +581,7 @@ void BetterChat::onTimerUpdate() {
 
 // Overtime
 void BetterChat::onOvertimeStarted() {
-	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress || endGameScreen) { return; }
 	LOG("[EVENT] Overtime");
 	whitelist.clear();
 	addKickoffMessages();
@@ -562,7 +589,7 @@ void BetterChat::onOvertimeStarted() {
 
 // Replay end
 void BetterChat::addKickoffMessages() {
-	if (!gameWrapper->IsInOnlineGame() || !gameInProgress) { return; }
+	if (!gameWrapper->IsInOnlineGame() || !gameInProgress || endGameScreen) { return; }
 	waitingForKickoff = true;
 	map<string, bool> beforeKickoffMsg = readMapInJson(config, "beforeKickoff");
 	for (const auto& pair : beforeKickoffMsg) {
@@ -581,13 +608,14 @@ void BetterChat::gameEnd() {
 	if (gameInProgress) {
 		resetWhitelist();
 		LOG("[EVENT] Game end");
+		endGameScreen = true;
 		gameWrapper->RegisterDrawable(bind(&BetterChat::ShowToxicityScores, this, std::placeholders::_1));
 	}
 }
 
 // Display the table with the number of blocked messages per player during the game
 void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
-	if (getParamsInJson(config).chatfilter && getParamsInJson(config).toxicityscores && cvarManager->getCvar("betterchat_enabled").getBoolValue()) {
+	if (getParamsInJson(config).toxicityscores && cvarManager->getCvar("betterchat_enabled").getBoolValue()) {
 		canvas.SetColor(LinearColor(255, 255, 255, 255));
 
 		int x = cvarManager->getCvar("betterchat_score_X").getIntValue();
@@ -652,6 +680,9 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 void BetterChat::gameDestroyed() {
 	LOG("[EVENT] Game destroyed");
 	gameInProgress = false;
+	endGameScreen = false;
+	gamemode = "";
+	playersInfos.clear();
 	gameWrapper->UnregisterDrawables(); // Erase the table
 }
 
@@ -668,6 +699,8 @@ void BetterChat::handleMsg(bool cancel, std::string playerName) {
 		if (playersInfos[playerName].numMsg == 1) { // If it is the first message sent by this player
 			playersInfos[playerName].teamNum = (unsigned char)Params->Team;
 		}
+
+		gameWrapper->UnhookEvent("Function TAGame.GFxData_Chat_TA.OnChatMessage");
 	});
 }
 
@@ -738,10 +771,6 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 		}
 		handleMsg(cancel, playerName);
 	}
-
-	gameWrapper->HookEventWithCallerPost<ActorWrapper>("Function TAGame.HUDBase_TA.OnChatMessage", [this](ActorWrapper caller, void* params, ...) {
-		gameWrapper->UnhookEvent("Function TAGame.GFxData_Chat_TA.OnChatMessage");
-	});
 }
 
 #pragma endregion Game_Functions

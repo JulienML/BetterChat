@@ -197,17 +197,21 @@ void BetterChat::RenderSettings() {
 					if (pluginParams.chatfilter) {
 						ImGui::Text("\n");
 
-						ImGui::BeginChild("Quickchats", ImVec2(755, 450), true, ImGuiWindowFlags_MenuBar); ;
+						// Menu Bar
+						ImGui::BeginChild("Config Table", ImVec2(775, 450), true, ImGuiWindowFlags_MenuBar);
 						if (ImGui::BeginMenuBar())
 						{
 							ImGui::Text("Configuration");
 							ImGui::EndMenuBar();
 						}
 
-						float headerOffsetX;
-						float headerOffsetY = ImGui::GetTextLineHeight() * 0.5f + 2;
+						// Headers child
+						ImGui::BeginChild("Headers", ImVec2(0, 35), false);
 
 						ImGui::Columns(7, nullptr);
+
+						float headerOffsetX;
+						float headerOffsetY = ImGui::GetTextLineHeight() * 0.5f + 2;
 
 						ImGui::SetColumnWidth(-1, 150);
 						headerOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize("Quickchats").x) * 0.5f;
@@ -254,18 +258,29 @@ void BetterChat::RenderSettings() {
 						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + headerOffsetX - 6);
 						ImGui::SetCursorPosY(ImGui::GetCursorPosY() + headerOffsetY);
 						ImGui::Text("After a save");
-						ImGui::NextColumn();
+
+						ImGui::Columns(1, nullptr);
+						ImGui::EndChild();
+
 						ImGui::Separator();
+						ImGui::Dummy(ImVec2(0, 3));
+
+						// Table content
+
+						ImGui::BeginChild("TableContent", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
+						ImGui::Columns(7, nullptr);
 
 						for (const auto& chat : idQuickchats) {
 							for (const string column : categories) {
 								ImGui::PushID(column.c_str());
 								if (column == "quickchats") {
+									ImGui::SetColumnWidth(-1, 150);
 									float textOffsetX = (ImGui::GetColumnWidth() - ImGui::CalcTextSize(chat.second.c_str()).x) * 0.5f;
 									ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textOffsetX - 6);
 									ImGui::Text(chat.second.c_str());
 								}
 								else {
+									ImGui::SetColumnWidth(-1, 100);
 									const string msg = chat.first;
 									map<string, bool> map = maps[column];
 									bool check = map[msg];
@@ -297,8 +312,10 @@ void BetterChat::RenderSettings() {
 								ImGui::NextColumn();
 							}
 						}
-						ImGui::EndChild();
 						ImGui::Columns(1, nullptr);
+						ImGui::EndChild();
+
+						ImGui::EndChild();
 
 						// Message filter options
 						ImGui::Text("\nMessage filter options:");
@@ -322,8 +339,10 @@ void BetterChat::RenderSettings() {
 						if (ImGui::Checkbox("Do not count a pass if an opponent touch it", &pluginParams.unwanted_pass)) {
 							editParamInJson(config, "unwanted_pass", pluginParams.unwanted_pass);
 						}
+					}
 
-						// Toxicity Scores
+					// Toxicity scores
+					if (pluginParams.antispam || pluginParams.chatfilter) {
 						ImGui::Text("\n");
 						if (ImGui::Checkbox("Toxicity scores", &pluginParams.toxicityscores)) {
 							editParamInJson(config, "toxicityscores", pluginParams.toxicityscores);
@@ -332,6 +351,7 @@ void BetterChat::RenderSettings() {
 							ImGui::SetTooltip("Enable/Disable Toxicity Scores (at the end of the game)");
 						}
 					}
+
 					// Delete config button
 					if (config != "Default config") {
 						ImGui::Text("\n");
