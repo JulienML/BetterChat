@@ -198,6 +198,19 @@ void BetterChat::jsonFileExists() {
 				outputFile << std::setw(4) << jsonData << endl;
 				outputFile.close();
 			}
+
+			if(!jsonData["Default config"].contains("banned_words")) { // If the file version is older than BetterChat v4.0.0
+				for (auto config = jsonData.begin(); config != jsonData.end(); ++config) {
+					if (config.key() != "ConfigByGamemode") {
+						jsonData[config.key()]["banned_words"] = list<string>{};
+						jsonData[config.key()]["params"]["block_custom_msg"] = false;
+					}
+				}
+
+				ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+				outputFile << std::setw(4) << jsonData << endl;
+				outputFile.close();
+			}
 		}
 
 		if (!jsonData.contains("ConfigByGamemode")) { // If the file version is older than BetterChat v3.0.0
@@ -212,6 +225,7 @@ void BetterChat::jsonFileExists() {
 			outputFile.close();
 		}
 	}
+
 	if (filesystem::exists(gameWrapper->GetDataFolder().string() + "/BetterChat_Blacklist.json")) { // Deletes the file used before BetterChat v2.0.0
 		string path = gameWrapper->GetDataFolder().string() + "/BetterChat_Blacklist.json";
 		remove(path.c_str());
@@ -309,6 +323,7 @@ void BetterChat::toggleQuickchatInJson(string config, string category, string id
 	ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 	outputFile << std::setw(4) << jsonData << endl;
 	outputFile.close();
+	
 	LOG("\"" + BetterChat::idQuickchats[idMsg] + "\" is now " + (jsonData[config][category][idMsg] ? "allowed" : "forbidden") + " in '" + category + "' category of the '" + config + "' configuration.");
 }
 
@@ -328,6 +343,7 @@ BetterChat::BetterChatParams BetterChat::getParamsInJson(string config) {
 	params.aftersavetime = jsonData[config]["params"]["aftersavetime"];
 	params.owngoal = jsonData[config]["params"]["owngoal"];
 	params.unwanted_pass = jsonData[config]["params"]["unwanted_pass"];
+	params.block_custom_msg = jsonData[config]["params"]["block_custom_msg"];
 	params.toxicityscores = jsonData[config]["params"]["toxicityscores"];
 
 	return params;
@@ -350,6 +366,51 @@ void BetterChat::editParamInJson(string config, string param, std::variant<bool,
 	ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 	outputFile << std::setw(4) << jsonData << endl;
 	outputFile.close();
+}
+
+// Get the list of banned words in the json file
+list<string> BetterChat::getBannedWordsInJson(string config) {
+	ifstream inputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	json jsonData;
+	inputFile >> jsonData;
+	inputFile.close();
+
+	list<string> bannedWords = jsonData[config]["banned_words"];
+	return bannedWords;
+}
+
+// Add a banned word in the json file
+void BetterChat::addBannedWordInJson(string config, string word) {
+	ifstream inputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	json jsonData;
+	inputFile >> jsonData;
+	inputFile.close();
+
+	jsonData[config]["banned_words"].emplace_back(word);
+
+	ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	outputFile << std::setw(4) << jsonData << endl;
+	outputFile.close();
+
+	LOG("The word \"" + word + "\" has been added to the banned words list in the \"" + config + "\" configuration.");
+}
+
+// Remove a banned word in the json file
+void BetterChat::removeBannedWordInJson(string config, string word) {
+	ifstream inputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	json jsonData;
+	inputFile >> jsonData;
+	inputFile.close();
+
+	list<string> bannedWords = jsonData[config]["banned_words"];
+	bannedWords.erase(std::remove(bannedWords.begin(), bannedWords.end(), word), bannedWords.end());
+	jsonData[config]["banned_words"] = bannedWords;
+
+	ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
+	outputFile << std::setw(4) << jsonData << endl;
+	outputFile.close();
+
+	LOG("The word \"" + word + "\" has been removed from the banned words list in the \"" + config + "\" configuration.");
 }
 
 #pragma endregion JSON_Functions
@@ -760,9 +821,21 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 				}
 			}
 		}
-		else {
+		else { // If it is a written message
 			if (pluginParams.nowrittenmsg) {
 				cancel = true;
+			}
+			else {
+				list<string> banned_words = getBannedWordsInJson(config);
+				if (pluginParams.block_custom_msg) {
+					for (const auto& word : banned_words) {
+						regex word_regex("\\b" + word + "\\b", regex_constants::icase);
+						if (regex_search(msgID, word_regex)) {
+							cancel = true;
+							break;
+						}
+					}
+				}
 			}
 			if(pluginParams.writtenmsgastoxic) {
 				if (cancel) playersInfos[playerName].blockedMsg += 1;

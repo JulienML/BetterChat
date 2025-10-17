@@ -89,6 +89,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		int aftersavetime;
 		bool owngoal;
 		bool unwanted_pass;
+		bool block_custom_msg;
 		bool toxicityscores;
 	};
 
@@ -242,6 +243,9 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	void toggleQuickchatInJson(std::string config, std::string category, std::string idMsg);
 	BetterChatParams getParamsInJson(std::string config);
 	void editParamInJson(std::string config, std::string param, std::variant<bool, int> value);
+	std::list<std::string> getBannedWordsInJson(std::string config);
+	void addBannedWordInJson(std::string config, std::string word);
+	void removeBannedWordInJson(std::string config, std::string word);
 
 	virtual void onLoad();
 	virtual void onUnload();

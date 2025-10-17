@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "BetterChat.h"
 #include <nlohmann/json.hpp>
 #include <set>
@@ -13,6 +13,19 @@ using json = nlohmann::json;
 
 bool newConfigButtonClicked = false;
 string newConfigName = "";
+string newWord = "";
+
+static int ForceLowercaseAlphaCallback(ImGuiInputTextCallbackData* data) {
+	if ((data->EventChar >= 'A' && data->EventChar <= 'Z') ||
+		(data->EventChar >= 'a' && data->EventChar <= 'z')) {
+		if (data->EventChar >= 'A' && data->EventChar <= 'Z') {
+			data->EventChar += 32; // Convert uppercase to lowercase
+		}
+		return 0;
+	}
+	data->EventChar = 0; // Discard non-alphabetic characters
+	return 1;
+}
 
 //Plugin Settings Window code here
 
@@ -132,7 +145,7 @@ void BetterChat::RenderSettings() {
 					newConfigName = "";
 				}
 				else {
-					ImGui::OpenPopup("Error");
+					ImGui::OpenPopup("ConfigError");
 				}
 			}
 		}
@@ -339,6 +352,52 @@ void BetterChat::RenderSettings() {
 						if (ImGui::Checkbox("Do not count a pass if an opponent touch it", &pluginParams.unwanted_pass)) {
 							editParamInJson(config, "unwanted_pass", pluginParams.unwanted_pass);
 						}
+
+						// Banned words list
+						if (ImGui::Checkbox("Block custom messages", &pluginParams.block_custom_msg)) {
+							editParamInJson(config, "block_custom_msg", pluginParams.block_custom_msg);
+						}
+						if (pluginParams.block_custom_msg) {
+							list<string> bannedWords = getBannedWordsInJson(config);
+							ImGui::BeginChild(
+								"Banned words list",
+								ImVec2(230, 130),
+								true,
+								ImGuiWindowFlags_HorizontalScrollbar
+							);
+
+							for (auto& word : bannedWords) {
+								ImGui::Text(word.c_str());
+
+								// Delete button
+								ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 15);
+								ImGui::PushID(word.c_str());
+								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+								ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+								ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
+								if (ImGui::Button("x", ImVec2(15, 0))) {
+									removeBannedWordInJson(config, word);
+								}
+								ImGui::PopStyleColor(3);
+								ImGui::PopID();
+							}
+
+							ImGui::EndChild();
+
+							ImGui::PushItemWidth(200);
+							ImGui::InputText("", &newWord, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, ForceLowercaseAlphaCallback);
+							ImGui::PopItemWidth();
+							ImGui::SameLine();
+							if (ImGui::Button("Add")) {
+								if (newWord != "" && find(bannedWords.begin(), bannedWords.end(), newWord) == bannedWords.end()) {
+									addBannedWordInJson(config, newWord);
+									newWord = "";
+								}
+								else {
+									ImGui::OpenPopup("WordError");
+								}
+							}
+						}
 					}
 
 					// Toxicity scores
@@ -399,8 +458,14 @@ void BetterChat::RenderSettings() {
 
 	ImGui::Text("Plugin version: %s", plugin_version);
 
-	if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+	if (ImGui::BeginPopupModal("ConfigError", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::Text("This config name is invalid\nor already exists.");
+		if (ImGui::Button("OK", ImVec2(50, 0))) { ImGui::CloseCurrentPopup(); }
+		ImGui::EndPopup();
+	}
+
+	if (ImGui::BeginPopupModal("WordError", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::Text("This word is invalid\nor is already in the list.");
 		if (ImGui::Button("OK", ImVec2(50, 0))) { ImGui::CloseCurrentPopup(); }
 		ImGui::EndPopup();
 	}
