@@ -99,17 +99,17 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		uintptr_t StatEvent;
 	};
 
-	struct FHUDChatMessage
-	{
-		void* PRI;
-		void* Team;
-		wchar_t* PlayerName;
-		uint8_t PlayerNamePadding[0x8];
-		wchar_t* Message;
-		uint8_t MessagePadding[0x8];
-		uint8_t ChatChannel;
-		unsigned long bPreset : 1;
-	};
+	// struct FHUDChatMessage
+	// {
+	// 	void* PRI;
+	// 	void* Team;
+	// 	wchar_t* PlayerName;
+	// 	uint8_t PlayerNamePadding[0x8];
+	// 	wchar_t* Message;
+	// 	uint8_t MessagePadding[0x8];
+	// 	uint8_t ChatChannel;
+	// 	unsigned long bPreset : 1;
+	// };
 
 	struct FString
 	{
@@ -215,6 +215,17 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		struct FString                                     EpicAccountId;                                    		// 0x0030 (0x0010) [0x0000000000400000] (CPF_NeedCtorLink)
 		uint8_t                                            Platform;                                         		// 0x0040 (0x0001) [0x0000000000000000]               
 		uint8_t                                            SplitscreenID;                                    		// 0x0041 (0x0001) [0x0000000000000000]               
+	};
+
+	struct FHUDChatMessage
+	{
+		class APlayerReplicationInfo* PRI;
+		class ATeam_TA* Team;               
+		struct FString PlayerName;
+		struct FString Message;
+		uint8_t ChatChannel;               
+		unsigned long bPreset : 1; 
+		struct FUniqueNetId Recipient;
 	};
 
 	struct FGFxChatMessage {
