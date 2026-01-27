@@ -25,6 +25,7 @@ struct pInfos {
 	int blockedMsg;
 	int numMsg;
 	unsigned char teamNum;
+	map<string, int> blockedMsgCount;
 };
 
 map<string, pInfos> playersInfos;
@@ -45,10 +46,16 @@ unsigned char lastTouchTeam;
 unsigned char secondLastTouchTeam;
 unsigned char thirdLastTouchTeam;
 
+list<string> eventsInProgress;
+
 int lastToucherID;
 
 string gamemode;
 string config;
+
+// Chat logging
+json chatLogs;
+chrono::system_clock::time_point gameStartTime;
 
 void BetterChat::onLoad()
 {
@@ -56,7 +63,7 @@ void BetterChat::onLoad()
 
 	cvarManager->registerCvar("betterchat_enabled", "1", "Enable BetterChat Plugin", true, true, 0, true, 1);
 
-	cvarManager->registerCvar("betterchat_score_X", "1530", "", true, true, 0, true, 1920);
+	cvarManager->registerCvar("betterchat_score_X", "1450", "", true, true, 0, true, 1920);
 	cvarManager->registerCvar("betterchat_score_Y", "45", "", true, true, 0, true, 1080);
 
 	jsonFileExists();
@@ -421,6 +428,7 @@ void BetterChat::removeBannedWordInJson(string config, string word) {
 void BetterChat::resetWhitelist() {
 	LOG("Messages have been reset");
 	whitelist.clear();
+	eventsInProgress.clear();
 	map<string, bool> defaultMsg = readMapInJson(config, "default");
 	for (const auto& pair : defaultMsg) {
 		if (pair.second) {
@@ -486,6 +494,10 @@ void BetterChat::onNewGame() {
 
 		resetWhitelist();
 		playersInfos.clear();
+		
+		// Initialize chat log
+		chatLogs = json::array();
+		gameStartTime = chrono::system_clock::now();
 
 		gameWrapper->HookEvent("Function GameEvent_TA.Countdown.BeginState", bind(&BetterChat::gameBegin, this));
 	}
@@ -532,9 +544,11 @@ void BetterChat::onStatTickerMessage(ServerWrapper caller, void* params) {
 	if (name == "Goal") { // Goal
 		goal = true;
 		save = false;
+		eventsInProgress.remove("Save");
 	}
 	else if (name == "Save" || name == "EpicSave") { // Save
 		whitelist.clear();
+		eventsInProgress.emplace_back("Save");
 		LOG("[EVENT] Save");
 		map<string, bool> afterSaveMsg = readMapInJson(config, "afterSave");
 		for (const auto& pair : afterSaveMsg) {
@@ -546,6 +560,7 @@ void BetterChat::onStatTickerMessage(ServerWrapper caller, void* params) {
 		save = true;
 	}
 	else if (name == "Assist") { // Pass
+		eventsInProgress.emplace_back("Assist");
 		LOG("[EVENT] Assist");
 		assist = true;
 	}
@@ -568,6 +583,8 @@ void BetterChat::onGoal() {
 		orangeScore = teams.Get(1).GetScore();
 		scorerTeam = 1;
 	}
+	
+	eventsInProgress.emplace_back(scorerTeam == 0 ? "Blue goal" : "Orange goal");
 
 	BetterChatParams pluginParams = getParamsInJson(config);
 
@@ -651,6 +668,7 @@ void BetterChat::onOvertimeStarted() {
 // Replay end
 void BetterChat::addKickoffMessages() {
 	if (!gameWrapper->IsInOnlineGame() || !gameInProgress || endGameScreen) { return; }
+	eventsInProgress.emplace_back("Kickoff");
 	waitingForKickoff = true;
 	map<string, bool> beforeKickoffMsg = readMapInJson(config, "beforeKickoff");
 	for (const auto& pair : beforeKickoffMsg) {
@@ -689,7 +707,7 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 		canvas.DrawString("Blocked messages", 1, 1);
 
 		canvas.SetPosition(Vector2({ x + 300, y }));
-		canvas.DrawString("Ratio", 1, 1);
+		canvas.DrawString("Most blocked message", 1, 1);
 
 		map<string, pInfos>::iterator player;
 		for (player = playersInfos.begin(); player != playersInfos.end(); ++player) {
@@ -729,10 +747,40 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 			}
 
 			canvas.SetPosition(Vector2({ x + 150, y + 20 * (int)distance(playersInfos.begin(), playersInfos.find(player->first)) + 20 }));
-			canvas.DrawString(to_string(player->second.blockedMsg) + "/" + to_string(player->second.numMsg), 1, 1);
+			canvas.DrawString(to_string(player->second.blockedMsg) + "/" + to_string(player->second.numMsg) + " (" + score + ")", 1, 1);
 
 			canvas.SetPosition(Vector2({ x + 300, y + 20 * (int)distance(playersInfos.begin(), playersInfos.find(player->first)) + 20 }));
-			canvas.DrawString(score, 1, 1);
+			
+			// Find the most blocked message
+			string mostBlockedMsg = "";
+			int maxCount = 0;
+			for (const auto& msgPair : player->second.blockedMsgCount) {
+				if (msgPair.second > maxCount) {
+					maxCount = msgPair.second;
+					mostBlockedMsg = msgPair.first;
+				}
+			}
+			
+			// Display the most blocked message
+			if (!mostBlockedMsg.empty()) {
+				regex quickchat_pattern("^Group\\dMessage\\d\\d?$");
+				if (regex_match(mostBlockedMsg, quickchat_pattern)) {
+					// It's a quickchat, get the text from idQuickchats
+					if (idQuickchats.find(mostBlockedMsg) != idQuickchats.end()) {
+						canvas.DrawString(idQuickchats[mostBlockedMsg] + " (" + to_string(maxCount) + ")", 1, 1);
+					}
+					else {
+						canvas.DrawString(mostBlockedMsg + " (x" + to_string(maxCount) + ")", 1, 1);
+					}
+				}
+				else {
+					// It's a written message, print it directly
+					canvas.DrawString(mostBlockedMsg + " (x" + to_string(maxCount) + ")", 1, 1);
+				}
+			}
+			else {
+				canvas.DrawString("-", 1, 1);
+			}
 		}
 	}
 }
@@ -740,6 +788,32 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 // Game destroyed
 void BetterChat::gameDestroyed() {
 	LOG("[EVENT] Game destroyed");
+	
+	// Save chat logs to file
+	if (!chatLogs.empty()) {
+		// Create logs directory if it doesn't exist
+		string logsDir = gameWrapper->GetDataFolder().string() + "/BetterChat_logs";
+		if (!filesystem::exists(logsDir)) {
+			filesystem::create_directory(logsDir);
+		}
+		
+		// Generate filename with timestamp
+		time_t startTime = chrono::system_clock::to_time_t(gameStartTime);
+		tm timeInfo;
+		localtime_s(&timeInfo, &startTime);
+		char timeBuffer[64];
+		strftime(timeBuffer, sizeof(timeBuffer), "%Y%m%d_%H%M%S", &timeInfo);
+		
+		string logFileName = logsDir + "/" + string(timeBuffer) + "_chat_logs.json";
+		
+		// Write to file
+		ofstream logFile(logFileName);
+		logFile << setw(4) << chatLogs << endl;
+		logFile.close();
+		
+		LOG("Chat logs saved to: " + logFileName);
+	}
+	
 	gameInProgress = false;
 	endGameScreen = false;
 	gamemode = "";
@@ -748,18 +822,39 @@ void BetterChat::gameDestroyed() {
 }
 
 // Erase a message if necessary
-void BetterChat::handleMsg(bool cancel, std::string playerName) {
-	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.GFxData_Chat_TA.OnChatMessage", [this, cancel, playerName](ActorWrapper Caller, void* params, ...) {
+void BetterChat::handleMsg(bool cancel, std::string playerName, std::string msgID) {
+	gameWrapper->HookEventWithCaller<ActorWrapper>("Function TAGame.GFxData_Chat_TA.OnChatMessage", [this, cancel, playerName, msgID](ActorWrapper Caller, void* params, ...) {
 		FGFxChatMessage* Params = (FGFxChatMessage*)params;
+		LOG(Params->PlayerName.ToString());
+		
+		// Log the message
+		json logEntry;
+		logEntry["timestamp"] = Params->TimeStamp.ToString();
+		logEntry["playerName"] = Params->PlayerName.ToString();
+		logEntry["playerTeam"] = Params->Team == 0 ? "Blue" : "Orange";
+		logEntry["message"] = Params->Message.ToString();
+		
+		// Determine message type
+		regex quickchat_pattern("^Group\\dMessage\\d\\d?$");
+		if (regex_match(msgID, quickchat_pattern)) {
+			logEntry["type"] = "quickchat";
+		} else {
+			logEntry["type"] = "written";
+		}
+		
+		logEntry["blocked"] = cancel;
+		logEntry["eventsInProgress"] = eventsInProgress;
+		
+		chatLogs.push_back(logEntry);
+		
 		if (cancel) { // If the message has to be cancelled
+			playersInfos[playerName].blockedMsgCount[Params->Message.ToString()] += 1;
 			Params->PlayerName = FS("");
 			Params->Message = FS("");
 			Params->ChatChannel = 0;
 			Params->TimeStamp = FS("");
 		}
-		if (playersInfos[playerName].numMsg == 1) { // If it is the first message sent by this player
-			playersInfos[playerName].teamNum = (unsigned char)Params->Team;
-		}
+		playersInfos[playerName].teamNum = (unsigned char)Params->Team;
 
 		gameWrapper->UnhookEvent("Function TAGame.GFxData_Chat_TA.OnChatMessage");
 	});
@@ -768,18 +863,14 @@ void BetterChat::handleMsg(bool cancel, std::string playerName) {
 // Determine if a quickchat message should be erased or not
 void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 	if (gameInProgress && params) {
-
 		FHUDChatMessage* chatMessageParams = static_cast<FHUDChatMessage*>(params);
-		if (chatMessageParams->PlayerName == nullptr) return;
-		std::wstring player(chatMessageParams->PlayerName);
-		std::string playerName(player.begin(), player.end());
-
-		if (chatMessageParams->Message == nullptr) return;
-		std::wstring message(chatMessageParams->Message);
-		std::string msgID(message.begin(), message.end());
-
+		if (chatMessageParams->PlayerName.IsValid()) return;
+		string playerName = chatMessageParams->PlayerName.ToString();
+		if (chatMessageParams->Message.IsValid()) return;
+		string msgID = chatMessageParams->Message.ToString();
+		
 		if (!cvarManager->getCvar("betterchat_enabled").getBoolValue()) {
-			handleMsg(false, playerName);
+			handleMsg(false, playerName, msgID);
 			return;
 		}
 
@@ -801,7 +892,7 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 			if (msgID != playersInfos[playerName].previousMsg) { // Different message
 				playersInfos[playerName].previousMsg = msgID;
 				playersInfos[playerName].previousTime = chrono::system_clock::now();
-				if (pluginParams.chatfilter && std::find(whitelist.begin(), whitelist.end(), msgID) == whitelist.end()) { // If message not in whitelist
+				if (pluginParams.chatfilter && std::find(whitelist.begin(), whitelist.end(), msgID) == whitelist.end()) { // Else, if message not in whitelist
 					cancel = true;
 					playersInfos[playerName].blockedMsg += 1;
 				}
@@ -838,11 +929,15 @@ void BetterChat::chatMessageEvent(ActorWrapper caller, void* params) {
 				}
 			}
 			if(pluginParams.writtenmsgastoxic) {
-				if (cancel) playersInfos[playerName].blockedMsg += 1;
+				if (cancel) {
+					playersInfos[playerName].blockedMsg += 1;
+					playersInfos[playerName].blockedMsgCount[msgID] += 1;
+				}
 				playersInfos[playerName].numMsg += 1;
 			}
 		}
-		handleMsg(cancel, playerName);
+		
+		handleMsg(cancel, playerName, msgID);
 	}
 }
 

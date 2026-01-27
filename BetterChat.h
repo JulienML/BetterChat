@@ -9,6 +9,8 @@
 #include <set>
 #include <string>
 #include <variant>
+#include <Windows.h>
+
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH);
 
 class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginSettingsWindow
@@ -18,7 +20,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		{"Group1Message1", "I got it!"}, // Je l'ai !
 		{"Group1Message2", "Need boost!"}, // Besoin de turbo !
 		{"Group1Message3", "Take the shot!"}, // Prends-le !
-		{"Group1Message4", "Defending."}, // Je d�fends.
+		{"Group1Message4", "Defending."}, // Je défends.
 		{"Group1Message5", "Go for it!"}, // Vas-y !
 		{"Group1Message6", "Centering!"}, // Centre !
 		{"Group1Message7", "All yours."}, // Il est pour toi.
@@ -36,47 +38,47 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		{"Group2Message1", "Nice shot!"}, // Beau tir !
 		{"Group2Message2", "Great pass!"}, // Belle passe !
 		{"Group2Message3", "Thanks!"}, // Merci !
-		{"Group2Message4", "What a save!"}, // Quel arr�t !
+		{"Group2Message4", "What a save!"}, // Quel arrêt !
 		{"Group2Message5", "Nice one!"}, // Bien vu !
-		{"Group2Message6", "What a play!"}, // Quelle intensit� !
-		{"Group2Message7", "Great clear!"}, // Beau d�gagement !
+		{"Group2Message6", "What a play!"}, // Quelle intensité !
+		{"Group2Message7", "Great clear!"}, // Beau dégagement !
 		{"Group2Message8", "Nice block!"}, // Super blocage !
 		{"Group2Message9", "Nice bump!"}, // Bel impact !
-		{"Group2Message10", "Nice demo!"}, // Jolie d�mo !
+		{"Group2Message10", "Nice demo!"}, // Jolie démo !
 		{"Group2Message11", "We got this."}, // On assure !
 
 		{"Group3Message1", "OMG!"}, // Oh mon dieu !
 		{"Group3Message2", "Noooo!"}, // Noooon !
 		{"Group3Message3", "Wow!"}, // Wow !
-		{"Group3Message4", "Close one..."}, // C'�tait pas loin...
+		{"Group3Message4", "Close one..."}, // C'était pas loin...
 		{"Group3Message5", "No way!"}, // Pas possible !
-		{"Group3Message6", "Holy cow!"}, // S�rieux ?!
+		{"Group3Message6", "Holy cow!"}, // Sérieux ?!
 		{"Group3Message7", "Whew."}, // Waouh.
 		{"Group3Message8", "Siiiick!"}, // Truc de ouf !
-		{"Group3Message9", "Calculated."}, // C'est pr�vu.
+		{"Group3Message9", "Calculated."}, // C'est prévu.
 		{"Group3Message10", "Savage!"}, // Sauvage !
 		{"Group3Message11", "Okay."}, // Ok.
 		{"Group3Message12", "Yes!"}, // Oui !
 
 		{"Group4Message1", "$#@%!"}, // $#@%!
-		{"Group4Message2", "No problem."}, // Pas de probl�mes.
+		{"Group4Message2", "No problem."}, // Pas de problèmes.
 		{"Group4Message3", "Whoops..."}, // Oups...
-		{"Group4Message4", "Sorry!"}, // D�sol� !
+		{"Group4Message4", "Sorry!"}, // Désolé !
 		{"Group4Message5", "My bad..."}, // Pardon...
 		{"Group4Message6", "Oops!"}, // Oups !
 		{"Group4Message7", "My fault."}, // Ma faute.
 
 		{"Group5Message1", "gg"}, // gg
-		{"Group5Message2", "Well played."}, // Bien jou�.
-		{"Group5Message3", "That was fun!"}, // C'�tait cool !
-		{"Group5Message4", "Rematch!"}, // On remet �a !
+		{"Group5Message2", "Well played."}, // Bien joué.
+		{"Group5Message3", "That was fun!"}, // C'était cool !
+		{"Group5Message4", "Rematch!"}, // On remet ça !
 		{"Group5Message5", "One. More. Game."}, // Encore. Une. Partie.
 		{"Group5Message6", "What a game!"}, // Quelle partie !
-		{"Group5Message7", "Nice moves!"}, // Super d�placements !
+		{"Group5Message7", "Nice moves!"}, // Super déplacements !
 		{"Group5Message8", "Everybody dance!"}, // Que tout le monde dance !
 		{"Group5Message9", "Party Up?"}, // On groupe ?
 
-		{"Group6Message4", "This is Rocket League!"}, // �a c'est Rocket League !
+		{"Group6Message4", "This is Rocket League!"}, // Ça c'est Rocket League !
 	};
 
 	// Structs
@@ -98,18 +100,6 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 		uintptr_t Victim;
 		uintptr_t StatEvent;
 	};
-
-	// struct FHUDChatMessage
-	// {
-	// 	void* PRI;
-	// 	void* Team;
-	// 	wchar_t* PlayerName;
-	// 	uint8_t PlayerNamePadding[0x8];
-	// 	wchar_t* Message;
-	// 	uint8_t MessagePadding[0x8];
-	// 	uint8_t ChatChannel;
-	// 	unsigned long bPreset : 1;
-	// };
 
 	struct FString
 	{
@@ -152,7 +142,9 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 			if (!IsValid())
 			{
 				std::wstring wideStr(ArrayData);
-				std::string str(wideStr.begin(), wideStr.end());
+				int size_needed = WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), (int)wideStr.length(), nullptr, 0, nullptr, nullptr);
+				std::string str(size_needed, 0);
+				WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), (int)wideStr.length(), &str[0], size_needed, nullptr, nullptr);
 				return str;
 			}
 
@@ -261,7 +253,7 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	virtual void onLoad();
 	virtual void onUnload();
 
-	void handleMsg(bool cancel, std::string playerName);
+	void handleMsg(bool cancel, std::string playerName, std::string msgID);
 	
 	void onNewGame();
 	void setConfig();
