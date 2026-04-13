@@ -252,8 +252,6 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 
 	virtual void onLoad();
 	virtual void onUnload();
-
-	void handleMsg(bool cancel, std::string playerName, std::string msgID);
 	
 	void onNewGame();
 	void setConfig();
@@ -267,6 +265,8 @@ class BetterChat: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::P
 	void onTimerUpdate();
 	void onGoal();
 	void onOvertimeStarted();
+
+	void onMessage(ActorWrapper Caller, void* params);
 
 	void gameDestroyed();
 	void ShowToxicityScores(CanvasWrapper canvas);
