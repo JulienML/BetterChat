@@ -132,8 +132,10 @@ void BetterChat::jsonFileExists() {
 	if (!filesystem::exists(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json")) {
 
 		// Default config
+		json defaultConfig = BetterChat::defaultFilterConfig;
+
 		ofstream NewFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
-		NewFile << setw(4) << "{\"Default config\":{\"afterAlliedGoal\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true, \"Group1Message15\":true, \"Group1Message16\":true, \"Group1Message17\": true, \"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":true,\"Group2Message10\":false,\"Group2Message11\":true,\"Group2Message2\":false,\"Group2Message3\":true,\"Group2Message4\":false,\"Group2Message5\":true,\"Group2Message6\":true,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":true,\"Group3Message1\":true,\"Group3Message10\":true,\"Group3Message11\":false,\"Group3Message12\":true,\"Group3Message2\":false,\"Group3Message3\":true,\"Group3Message4\":false,\"Group3Message5\":true,\"Group3Message6\":true,\"Group3Message7\":false,\"Group3Message8\":true,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group5Message9\":true,\"Group6Message4\":true},\"afterEnemyGoal\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message15\":true, \"Group1Message16\":true, \"Group1Message17\": true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":true,\"Group2Message10\":false,\"Group2Message11\":true,\"Group2Message2\":false,\"Group2Message3\":true,\"Group2Message4\":false,\"Group2Message5\":true,\"Group2Message6\":true,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":true,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message12\":false,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group5Message9\":true,\"Group6Message4\":false},\"afterPass\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message15\":true, \"Group1Message16\":true, \"Group1Message17\": true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":true,\"Group2Message10\":false,\"Group2Message11\":true,\"Group2Message2\":true,\"Group2Message3\":true,\"Group2Message4\":false,\"Group2Message5\":true,\"Group2Message6\":true,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":true,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message12\":true,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group5Message9\":true,\"Group6Message4\":false},\"afterSave\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message15\":true, \"Group1Message16\":true, \"Group1Message17\": true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":false,\"Group2Message10\":false,\"Group2Message11\":true,\"Group2Message2\":false,\"Group2Message3\":true,\"Group2Message4\":true,\"Group2Message5\":false,\"Group2Message6\":false,\"Group2Message7\":true,\"Group2Message8\":true,\"Group2Message9\":false,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message12\":true,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group5Message9\":true,\"Group6Message4\":false},\"beforeKickoff\":{\"Group1Message1\":true,\"Group1Message10\":true,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message15\":true, \"Group1Message16\":true, \"Group1Message17\": true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":false,\"Group2Message10\":false,\"Group2Message11\":true,\"Group2Message2\":false,\"Group2Message3\":false,\"Group2Message4\":false,\"Group2Message5\":false,\"Group2Message6\":false,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":false,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message12\":true,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group5Message9\":true,\"Group6Message4\":false},\"default\":{\"Group1Message1\":true,\"Group1Message10\":false,\"Group1Message11\":true,\"Group1Message12\":true,\"Group1Message13\":true,\"Group1Message14\":true,\"Group1Message15\":true, \"Group1Message16\":true, \"Group1Message17\": true,\"Group1Message2\":true,\"Group1Message3\":true,\"Group1Message4\":true,\"Group1Message5\":true,\"Group1Message6\":true,\"Group1Message7\":true,\"Group1Message8\":true,\"Group1Message9\":true,\"Group2Message1\":false,\"Group2Message10\":false,\"Group2Message11\":true,\"Group2Message2\":false,\"Group2Message3\":false,\"Group2Message4\":false,\"Group2Message5\":false,\"Group2Message6\":false,\"Group2Message7\":false,\"Group2Message8\":false,\"Group2Message9\":false,\"Group3Message1\":false,\"Group3Message10\":false,\"Group3Message11\":false,\"Group3Message12\":true,\"Group3Message2\":false,\"Group3Message3\":false,\"Group3Message4\":false,\"Group3Message5\":false,\"Group3Message6\":false,\"Group3Message7\":false,\"Group3Message8\":false,\"Group3Message9\":false,\"Group4Message1\":false,\"Group4Message2\":true,\"Group4Message3\":true,\"Group4Message4\":true,\"Group4Message5\":true,\"Group4Message6\":true,\"Group4Message7\":true,\"Group5Message1\":true,\"Group5Message2\":true,\"Group5Message3\":true,\"Group5Message4\":true,\"Group5Message5\":true,\"Group5Message6\":true,\"Group5Message7\":true,\"Group5Message8\":true,\"Group5Message9\":true,\"Group6Message4\":false}}}" << endl;
+		NewFile << std::setw(4) << defaultConfig << endl;
 		NewFile.close();
 
 		ifstream file(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
@@ -164,6 +166,11 @@ void BetterChat::jsonFileExists() {
 		jsonData["Default config"]["params"]["owngoal"] = false;
 		jsonData["Default config"]["params"]["unwanted_pass"] = false;
 		jsonData["Default config"]["params"]["toxicityscores"] = true;
+		jsonData["Default config"]["params"]["block_custom_msg"] = true;
+		jsonData["Default config"]["params"]["save_logs"] = false;
+
+		// Banned words
+		jsonData["Default config"]["banned_words"] = list<string>{};
 
 		// Config by gamemode
 		jsonData["ConfigByGamemode"]["1v1"] = "Default config";
@@ -218,10 +225,37 @@ void BetterChat::jsonFileExists() {
 				for (auto config = jsonData.begin(); config != jsonData.end(); ++config) {
 					if (config.key() != "ConfigByGamemode") {
 						jsonData[config.key()]["banned_words"] = list<string>{};
-						jsonData[config.key()]["params"]["block_custom_msg"] = false;
+						jsonData[config.key()]["params"]["block_custom_msg"] = true;
+						jsonData[config.key()]["params"]["save_logs"] = false;
+						
+						for (auto category = jsonData[config.key()].begin(); category != jsonData[config.key()].end(); ++category) {
+							if (category.key() != "params" && category.key() != "banned_words") {
+								jsonData[config.key()][category.key()]["Group1Message18"] = true;
+								jsonData[config.key()][category.key()]["Group1Message19"] = true;
+								jsonData[config.key()][category.key()]["Group1Message21"] = true;
+								jsonData[config.key()][category.key()]["Group3Message13"] = false;
+								jsonData[config.key()][category.key()]["Group3Message14"] = true;
+								jsonData[config.key()][category.key()]["Group3Message16"] = false;
+								jsonData[config.key()][category.key()]["Group3Message17"] = true;
+								jsonData[config.key()][category.key()]["Group3Message18"] = true;
+								jsonData[config.key()][category.key()]["Group4Message8"] = true;
+								if (category.key() == "beforeKickoff" || category.key() == "default") {
+									jsonData[config.key()][category.key()]["Group1Message20"] = true;
+								}
+								else {
+									jsonData[config.key()][category.key()]["Group1Message20"] = false;
+								}
+								if (category.key() == "afterAlliedGoal") {
+									jsonData[config.key()][category.key()]["Group3Message15"] = true;
+								}
+								else {
+									jsonData[config.key()][category.key()]["Group3Message15"] = false;
+								}
+							}
+						}
 					}
 				}
-
+				
 				ofstream outputFile(gameWrapper->GetDataFolder().string() + "/BetterChat_config.json");
 				outputFile << std::setw(4) << jsonData << endl;
 				outputFile.close();
@@ -360,6 +394,7 @@ BetterChat::BetterChatParams BetterChat::getParamsInJson(string config) {
 	params.unwanted_pass = jsonData[config]["params"]["unwanted_pass"];
 	params.block_custom_msg = jsonData[config]["params"]["block_custom_msg"];
 	params.toxicityscores = jsonData[config]["params"]["toxicityscores"];
+	params.save_logs = jsonData[config]["params"]["save_logs"];
 
 	return params;
 }
@@ -801,8 +836,10 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 void BetterChat::gameDestroyed() {
 	LOG("[EVENT] Game destroyed");
 	
-	// Save chat logs to file
-	if (!chatLogs.empty()) {
+	BetterChatParams pluginParams = getParamsInJson(config);
+
+	// Save chat logs to file if the option is enabled and if there are messages
+	if (!chatLogs.empty() && pluginParams.save_logs) {
 		// Create logs directory if it doesn't exist
 		string logsDir = gameWrapper->GetDataFolder().string() + "/BetterChat_logs";
 		if (!filesystem::exists(logsDir)) {
@@ -845,8 +882,6 @@ void BetterChat::onMessage(ActorWrapper Caller, void* params) {
 		string message = Params->Message.ToString();
 
 		if (playerName == "null" || playerTeamNum == 255) return;
-
-		LOG("Message from " + playerName + ": " + message);
 		
 		// ------------------------
 		// Quickchat detection

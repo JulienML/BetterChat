@@ -411,6 +411,19 @@ void BetterChat::RenderSettings() {
 						}
 					}
 
+					// Save logs option
+					ImGui::Text("\n");
+					if (ImGui::Checkbox("Save chat logs", &pluginParams.save_logs)) {
+						editParamInJson(config, "save_logs", pluginParams.save_logs);
+					}
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("If enabled, chat logs will be saved in a JSON file at the end of each game.");
+					}
+
+					if (ImGui::Button("Open logs folder")) {
+						system(("powershell -WindowStyle Hidden \"start \"\"" + gameWrapper->GetDataFolder().string() + "/BetterChat_logs\"\"\"").c_str());
+					}
+					
 					// Delete config button
 					if (config != "Default config") {
 						ImGui::Text("\n");
