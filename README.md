@@ -4,7 +4,7 @@
 
 In this way, you can make the usual toxic Rocket League chat more respectful and focus on your gameplay.
 
-**If you have any suggestions to improve the plugin, don't hesitate to create an [Issue](https://github.com/JulienML/BetterChat/issues) or a [Pull Request](https://github.com/JulienML/BetterChat/pulls)!**
+**This plugin will not be updated anymore, as Psyonix plans to implement the Easy Anti-Cheat system, which will make it impossible to use BakkesMod and its plugins in online games. :cry:**
 
 # Table of contents
 
