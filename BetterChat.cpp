@@ -71,7 +71,7 @@ void BetterChat::onLoad()
 
 	jsonFileExists();
 
-	if (gameWrapper->IsInOnlineGame() && !gameWrapper->IsInReplay()) {
+	if (gameWrapper->IsInOnlineGame() && !gameWrapper->IsInReplay() && !gameWrapper->IsInFreeplay()) {
 		setConfig();
 		resetWhitelist();
 		gameInProgress = true;
@@ -836,31 +836,33 @@ void BetterChat::ShowToxicityScores(CanvasWrapper canvas) {
 void BetterChat::gameDestroyed() {
 	LOG("[EVENT] Game destroyed");
 	
-	BetterChatParams pluginParams = getParamsInJson(config);
+	if (gameInProgress) {
+		BetterChatParams pluginParams = getParamsInJson(config);
 
-	// Save chat logs to file if the option is enabled and if there are messages
-	if (!chatLogs.empty() && pluginParams.save_logs) {
-		// Create logs directory if it doesn't exist
-		string logsDir = gameWrapper->GetDataFolder().string() + "/BetterChat_logs";
-		if (!filesystem::exists(logsDir)) {
-			filesystem::create_directory(logsDir);
+		// Save chat logs to file if the option is enabled and if there are messages
+		if (!chatLogs.empty() && pluginParams.save_logs) {
+			// Create logs directory if it doesn't exist
+			string logsDir = gameWrapper->GetDataFolder().string() + "/BetterChat_logs";
+			if (!filesystem::exists(logsDir)) {
+				filesystem::create_directory(logsDir);
+			}
+		
+			// Generate filename with timestamp
+			time_t startTime = chrono::system_clock::to_time_t(gameStartTime);
+			tm timeInfo;
+			localtime_s(&timeInfo, &startTime);
+			char timeBuffer[64];
+			strftime(timeBuffer, sizeof(timeBuffer), "%Y%m%d_%H%M%S", &timeInfo);
+		
+			string logFileName = logsDir + "/" + string(timeBuffer) + "_chat_logs.json";
+		
+			// Write to file
+			ofstream logFile(logFileName);
+			logFile << setw(4) << chatLogs << endl;
+			logFile.close();
+		
+			LOG("Chat logs saved to: " + logFileName);
 		}
-		
-		// Generate filename with timestamp
-		time_t startTime = chrono::system_clock::to_time_t(gameStartTime);
-		tm timeInfo;
-		localtime_s(&timeInfo, &startTime);
-		char timeBuffer[64];
-		strftime(timeBuffer, sizeof(timeBuffer), "%Y%m%d_%H%M%S", &timeInfo);
-		
-		string logFileName = logsDir + "/" + string(timeBuffer) + "_chat_logs.json";
-		
-		// Write to file
-		ofstream logFile(logFileName);
-		logFile << setw(4) << chatLogs << endl;
-		logFile.close();
-		
-		LOG("Chat logs saved to: " + logFileName);
 	}
 	
 	gameInProgress = false;
